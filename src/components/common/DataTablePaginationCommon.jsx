@@ -5,14 +5,14 @@ import {
   ChevronsRight,
 } from "lucide-react";
 
-import { Button } from "@/Component/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/Component/ui/select";
+} from "@/components/ui/select";
 
 export function DataTablePaginationCommon({
   table,
@@ -31,8 +31,8 @@ export function DataTablePaginationCommon({
   return (
     <div className="flex items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of {currentDataCount} row(s)
-        selected.
+        {table.getFilteredSelectedRowModel().rows.length} of {currentDataCount}{" "}
+        row(s) selected.
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">

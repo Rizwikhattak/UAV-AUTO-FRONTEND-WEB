@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/Component/ui/table";
+} from "@/components/ui/table";
 import { useState, useEffect } from "react";
 import { DataTablePaginationCommon } from "./DataTablePaginationCommon";
 import { DataTableViewOptionsCommon } from "./DataTableViewOptionsCommon";

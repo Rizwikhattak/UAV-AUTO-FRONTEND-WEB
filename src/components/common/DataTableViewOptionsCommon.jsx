@@ -3,14 +3,14 @@
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Settings2 } from "lucide-react";
 
-import { Button } from "@/Component/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/Component/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 export function DataTableViewOptionsCommon({ table }) {
   return (
