@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewHistory from "@/pages/History/page";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <ViewHistory />
+    </>
+  );
+};
 
-export default page
+export default page;

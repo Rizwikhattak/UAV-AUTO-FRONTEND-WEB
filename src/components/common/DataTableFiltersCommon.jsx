@@ -8,7 +8,20 @@ const DataTableFiltersCommon = ({
 }) => {
   return (
     <div className="flex items-center gap-3">
-      <Button variant="secondary">Hello</Button>
+      {filters?.map((filter, index) => {
+        return (
+          <Button
+            key={index}
+            variant="gray"
+            className={`${
+              filter === selectedFilter ? "bg-primary-custom" : "bg-gray-400"
+            } text-white hover:bg-primary-custom`}
+            onClick={() => handleFilterChange(filter)}
+          >
+            {filter}
+          </Button>
+        );
+      })}
     </div>
   );
 };

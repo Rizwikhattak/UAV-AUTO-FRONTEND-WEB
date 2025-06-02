@@ -1,9 +1,12 @@
-import React from 'react'
+import AddMissionPlan from "@/pages/PlanMissions/AddMissionPlan";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <AddMissionPlan />
+    </>
+  );
+};
 
-export default page
+export default page;

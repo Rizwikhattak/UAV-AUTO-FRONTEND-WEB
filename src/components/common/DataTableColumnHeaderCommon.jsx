@@ -12,11 +12,11 @@ import {
 
 export function DataTableColumnHeaderCommon({ column, title, className }) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+    return <div className={cn("px-3", className)}>{title}</div>;
   }
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
+    <div className={cn("flex items-center space-x-2 px-3", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -1,11 +1,11 @@
-import { ApiCommon } from "@/utils/ApiCommon";
+import { API_COMMON } from "@/utils/ApiCommon";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const addOperator = createAsyncThunk(
   "operator/AddOperator",
   async (data, { rejectWithValue }) => {
     try {
-      const operatorData = await ApiCommon(
+      const operatorData = await API_COMMON(
         "post",
         "form",
         "insert_operator",
@@ -23,7 +23,7 @@ export const getAllOperators = createAsyncThunk(
   "operator/GetAllOperators",
   async (data, { rejectWithValue }) => {
     try {
-      const operatorData = await ApiCommon(
+      const operatorData = await API_COMMON(
         "getAll",
         "form",
         "get_all_operators",
@@ -42,7 +42,7 @@ export const updateOperator = createAsyncThunk(
   "operator/UpdateOperator",
   async (data, { rejectWithValue }) => {
     try {
-      const operatorData = await ApiCommon(
+      const operatorData = await API_COMMON(
         "put",
         "form",
         `update_operator_by_id/${data.get("id")}`,
@@ -62,7 +62,7 @@ export const deleteOperator = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       console.log("IDDD", id);
-      const operatorData = await ApiCommon(
+      const operatorData = await API_COMMON(
         "delete",
         "json",
         `delete_operator_by_id/${id}`,

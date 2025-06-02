@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { DataTableCommon } from "@/components/common/DataTableCommon";
@@ -7,6 +7,11 @@ import { DataTableColumnHeaderCommon } from "@/components/common/DataTableColumn
 import DataTableFiltersCommon from "@/components/common/DataTableFiltersCommon";
 
 const ViewDronePage = () => {
+  const filters = ["Speed", "Flight Duration", "Ceiling"];
+  const [selectedFilter, setSelectedFilter] = useState(filters[0]);
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+  };
   const columns = [
     // Bank Name
     {
@@ -104,7 +109,11 @@ const ViewDronePage = () => {
       </div>
       <div className="space-y-3">
         <div>
-          <DataTableFiltersCommon />
+          <DataTableFiltersCommon
+            filters={filters}
+            selectedFilter={selectedFilter}
+            handleFilterChange={handleFilterChange}
+          />
         </div>
         <DataTableCommon
           // filters={filters}
@@ -157,7 +166,7 @@ const drones = [
     ceiling: "100m",
   },
   {
-    image: "/Images/dashboard_drone.png",
+    image: "/Images/Drone_1.png",
 
     name: "Falcon Pro",
     speed: "85km/h",
@@ -165,28 +174,19 @@ const drones = [
     ceiling: "300m",
   },
   {
-    image: "/Images/dashboard_drone.png",
-
+    image: "/Images/Drone_2.png",
     name: "Eagle Eye",
     speed: "70km/h",
     flightDuration: "1h",
     ceiling: "200m",
   },
   {
-    image: "/Images/dashboard_drone.png",
+    image: "/Images/Drone_3.png",
 
     name: "Swift Hawk",
     speed: "65km/h",
     flightDuration: "2h",
     ceiling: "350m",
-  },
-  {
-    image: "/Images/dashboard_drone.png",
-
-    name: "Eagle Eye",
-    speed: "55km/h",
-    flightDuration: "2.5h",
-    ceiling: "500m",
   },
 ];
 

@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewGeofence from "@/pages/GeoFence/ViewGeofence/Page";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <ViewGeofence />
+    </>
+  );
+};
 
-export default page
+export default page;

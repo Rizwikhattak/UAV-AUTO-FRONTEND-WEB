@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewMissionPlans from "@/pages/PlanMissions/ViewMissionPlans";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <ViewMissionPlans />
+    </>
+  );
+};
 
-export default page
+export default page;

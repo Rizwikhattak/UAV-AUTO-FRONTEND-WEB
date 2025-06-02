@@ -1,11 +1,11 @@
-import { ApiCommon } from "@/utils/ApiCommon";
+import { API_COMMON } from "@/utils/ApiCommon";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const addMissionPlan = createAsyncThunk(
   "planMission/AddMissionPlan",
   async (data, { rejectWithValue }) => {
     try {
-      const planMissionData = await ApiCommon(
+      const planMissionData = await API_COMMON(
         "post",
         "json",
         "insert_mission_plan",

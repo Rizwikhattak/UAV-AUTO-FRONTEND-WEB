@@ -1,9 +1,12 @@
-import React from 'react'
+import AddGeofence from "@/pages/GeoFence/AddGeoFence/page";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <AddGeofence />
+    </>
+  );
+};
 
-export default page
+export default page;
