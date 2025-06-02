@@ -2,21 +2,24 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { DataTableCommon } from "@/components/common/DataTableCommon";
+import { DataTableColumnHeaderCommon } from "@/components/common/DataTableColumnHeaderCommon";
+import DataTableFiltersCommon from "@/components/common/DataTableFiltersCommon";
+
 const ViewDronePage = () => {
   const columns = [
     // Bank Name
     {
       accessorKey: "image",
-      header: ({ column }) => (
-        <DataTableColumnHeaderCommon column={column} title="Image" />
-      ),
+      header: ({ column }) => <h1 className="font-bold text-lg py-3">Image</h1>,
       enableSorting: false,
+      size: 100, // <-- Set the "Image" column to 100px fixed width
+      minSize: 100, // enforce 100px minimum
+      maxSize: 100,
       cell: ({ row }) => {
         const src = row.getValue("image");
         return (
-          <div className="relative w-32 h-32">
+          <div className="relative w-12 sm:w-32 h-12 sm:h-32 rounded-lg">
             <Image
               src={src}
               alt="Sample Image"
@@ -30,32 +33,65 @@ const ViewDronePage = () => {
 
     // Account Type
     {
-      accessorKey: "rest_content",
-      header: ({ column }) => (
-        <DataTableColumnHeaderCommon column={column} title="Account Type" />
-      ),
+      accessorKey: "name",
+      header: ({ column }) => <h1 className="font-bold text-lg">Name</h1>,
       cell: ({ row }) => {
-        const { name, speed, flightDuration, ceiling } =
-          row.getValue("rest_content");
+        const { name, speed, flightDuration, ceiling } = row.original;
         return (
-          <span
-            className={`capitalize px-2 py-1 rounded-xl ${
-              type?.toLocaleLowerCase()?.trim()?.replace(/\s+/g, "") ===
-              "personal"
-                ? "bg-[#EFF8FF] text-[#175CD3]"
-                : "bg-gray-100 text-gray-400"
-            }`}
-          >
-            {name}
-          </span>
+          <div className="flex flex-col gap-3 px-4">
+            <div>
+              <h1>{name}</h1>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="relative w-4 h-4">
+                  <Image
+                    src="/Images/speed.png"
+                    alt="Ceiling Icon"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <div>
+                  <p>{speed}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative w-4 h-4">
+                  <Image
+                    src="/Images/battery.png"
+                    alt="Ceiling Icon"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <div>
+                  <p>{flightDuration}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative w-4 h-4">
+                  <Image
+                    src="/Images/ceiling.png"
+                    alt="Ceiling Icon"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <div>
+                  <p>{ceiling}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         );
       },
-      enableSorting: true,
+      enableSorting: false,
     },
   ];
   return (
-    <div>
-      <div>
+    <div className=" p-10">
+      <div className="flex flex-col items-center gap-3 pb-5">
         <h1 className="text-lg sm:text-2xl font-semibold">View Drones</h1>
         <div className="bg-blue-900 mx-auto relative rounded-lg w-64 h-36 sm:w-80 sm:h-40">
           <Image
@@ -66,7 +102,10 @@ const ViewDronePage = () => {
           />
         </div>
       </div>
-      <div>
+      <div className="space-y-3">
+        <div>
+          <DataTableFiltersCommon />
+        </div>
         <DataTableCommon
           // filters={filters}
           columns={columns}
@@ -112,48 +151,42 @@ const ViewDronePage = () => {
 const drones = [
   {
     image: "/Images/dashboard_drone.png",
-    rest_content: {
-      name: "Phantom X7",
-      speed: "90km/h",
-      flightDuration: "1.5h",
-      ceiling: "100m",
-    },
+    name: "Phantom X7",
+    speed: "90km/h",
+    flightDuration: "1.5h",
+    ceiling: "100m",
   },
   {
     image: "/Images/dashboard_drone.png",
-    rest_content: {
-      name: "Falcon Pro",
-      speed: "85km/h",
-      flightDuration: "2h",
-      ceiling: "300m",
-    },
+
+    name: "Falcon Pro",
+    speed: "85km/h",
+    flightDuration: "2h",
+    ceiling: "300m",
   },
   {
     image: "/Images/dashboard_drone.png",
-    rest_content: {
-      name: "Eagle Eye",
-      speed: "70km/h",
-      flightDuration: "1h",
-      ceiling: "200m",
-    },
+
+    name: "Eagle Eye",
+    speed: "70km/h",
+    flightDuration: "1h",
+    ceiling: "200m",
   },
   {
     image: "/Images/dashboard_drone.png",
-    rest_content: {
-      name: "Swift Hawk",
-      speed: "65km/h",
-      flightDuration: "2h",
-      ceiling: "350m",
-    },
+
+    name: "Swift Hawk",
+    speed: "65km/h",
+    flightDuration: "2h",
+    ceiling: "350m",
   },
   {
     image: "/Images/dashboard_drone.png",
-    rest_content: {
-      name: "Eagle Eye",
-      speed: "55km/h",
-      flightDuration: "2.5h",
-      ceiling: "500m",
-    },
+
+    name: "Eagle Eye",
+    speed: "55km/h",
+    flightDuration: "2.5h",
+    ceiling: "500m",
   },
 ];
 

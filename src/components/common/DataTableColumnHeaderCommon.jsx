@@ -1,14 +1,14 @@
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/Component/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/Component/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 export function DataTableColumnHeaderCommon({ column, title, className }) {
   if (!column.getCanSort()) {

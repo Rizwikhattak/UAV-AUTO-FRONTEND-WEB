@@ -189,69 +189,67 @@ export function DataTableCommon({
         </div>
       )}
       <div className="rounded-md">
-        <ScrollArea className="h-[calc(100vh-250px)] rounded-md flex-1">
-          <div className="w-full min-w-full">
-            <Table>
-              <TableHeader className=" bg-gray-50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length}>
-                      <div className="flex flex-col gap-2">
-                        {[...Array(pageSize || 5)].map((_, i) => (
-                          <Skeleton key={i} className="h-12 w-full" />
-                        ))}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
+        <div className="w-full min-w-full">
+          <Table>
+            <TableHeader className=" bg-gray-50">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>
+                    <div className="flex flex-col gap-2">
+                      {[...Array(pageSize || 5)].map((_, i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
                       ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </ScrollArea>
-        <div className="py-1 border-t bg-gray-50">
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        {/* <div className="py-1 border-t bg-gray-50">
           <DataTablePaginationCommon
             table={table}
             pageIndex={pageIndex}
@@ -261,7 +259,7 @@ export function DataTableCommon({
             totalCount={totalDataCount}
             currentDataCount={data.length}
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );
