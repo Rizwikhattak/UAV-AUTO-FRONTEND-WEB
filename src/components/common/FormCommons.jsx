@@ -325,6 +325,7 @@ export function DateTimePickerCommon({
     </div>
   );
 }
+
 export const CardInputCommon = ({ name = "image", control }) => {
   const { setValue, watch } = useFormContext();
   const imageValue = watch(name);

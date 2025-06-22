@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import { Button } from "../ui/button";
-export default function InteractiveMap({ isStationPin = false, handlePins }) {
+
+export default function InteractiveMap({
+  displayOnly = false,
+  pins = [],
+  onPinsChange,
+  mode = "route", // "station" or "route"
+}) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_GMAPS_KEY,
   });
 
   // ⇢ keep the map's centre here
   const [center, setCenter] = useState({ lat: 30, lng: 70 }); // fallback
-  const [pins, setPins] = useState([]);
+  const [localPins, setLocalPins] = useState(pins || []);
 
   /* 1️⃣  Get current location once on mount */
   useEffect(() => {
@@ -23,169 +29,122 @@ export default function InteractiveMap({ isStationPin = false, handlePins }) {
     );
   }, []);
 
+  // Update local pins when props change
+  useEffect(() => {
+    setLocalPins(pins || []);
+  }, [pins]);
+
   /* ↻ pin helpers */
   const addPin = (e) => {
-    e.latLng &&
-      setPins((p) => [
-        ...p,
-        { id: crypto.randomUUID(), lat: e.latLng.lat(), lng: e.latLng.lng() },
-      ]);
+    if (displayOnly) return; // Don't add pins in display mode
+
+    if (e.latLng) {
+      const newPin = {
+        id: crypto.randomUUID(),
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+        type: mode,
+      };
+
+      let updatedPins;
+
+      if (mode === "station") {
+        // For stations, replace existing pin (only one allowed)
+        updatedPins = [newPin];
+      } else {
+        // For routes, add to existing pins (multiple allowed)
+        updatedPins = [...localPins, newPin];
+      }
+
+      setLocalPins(updatedPins);
+
+      // Notify parent component
+      if (onPinsChange) {
+        onPinsChange(updatedPins);
+      }
+    }
   };
 
-  const removePin = (id) => setPins((p) => p.filter((m) => m.id !== id));
-  const clearPins = () => setPins([]);
+  const removePin = (id) => {
+    if (displayOnly) return; // Don't remove pins in display mode
+
+    const updatedPins = localPins.filter((m) => m.id !== id);
+    setLocalPins(updatedPins);
+
+    // Notify parent component
+    if (onPinsChange) {
+      onPinsChange(updatedPins);
+    }
+  };
+
+  const clearPins = () => {
+    if (displayOnly) return; // Don't clear pins in display mode
+
+    setLocalPins([]);
+    if (onPinsChange) {
+      onPinsChange([]);
+    }
+  };
 
   if (loadError) return <p>Error: {loadError.message}</p>;
   if (!isLoaded) return <p>Loading map…</p>;
-  console.log("pins", pins);
-  const defaultPinUrl =
-    "https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi.png";
+
+  // Different pin styles for different types
+  const getMarkerIcon = (pinType) => {
+    if (pinType === "station") {
+      return {
+        url: "https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi.png",
+        scaledSize: new google.maps.Size(25, 40),
+      };
+    } else {
+      // Route/geofence points - default marker or custom style
+      return {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: "#2563eb",
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: "#ffffff",
+      };
+    }
+  };
+
   return (
     <>
-      {/* <Button
-        variant="destructive"
-        onClick={clearPins}
-        style={{ margin: "8px 0" }}
-      >
-        Clear All
-      </Button> */}
+      {!displayOnly && (
+        <div className="mb-2 flex justify-between items-center">
+          <Button variant="destructive" onClick={clearPins} size="sm">
+            Clear All ({localPins.length})
+          </Button>
+          {mode === "station" && (
+            <span className="text-sm text-gray-600">
+              Click anywhere to {localPins.length > 0 ? "move" : "add"} station
+              pin
+            </span>
+          )}
+        </div>
+      )}
 
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={center} // ← lives in state, updates after geolocation
-        zoom={15}
+        center={center}
+        zoom={displayOnly ? 12 : 15}
         onClick={addPin}
+        options={{
+          disableDoubleClickZoom: displayOnly,
+          gestureHandling: displayOnly ? "cooperative" : "auto",
+        }}
       >
-        {isStationPin ? (
+        {localPins.map((p) => (
           <Marker
+            key={p.id}
             position={{ lat: p.lat, lng: p.lng }}
             onClick={() => removePin(p.id)}
-            icon={{
-              url: defaultPinUrl, // same graphic as the default
-              scaledSize: new google.maps.Size(25, 40), // 2× original
-            }}
+            icon={getMarkerIcon(p.type)}
+            title={displayOnly ? `${p.type} pin` : `Click to remove`}
           />
-        ) : (
-          pins.map((p) => (
-            <>
-              {/* <AdvancedMarker
-              position={{ lat: p.lat, lng: p.lng }}
-              onClick={() => removePin(p.id)}
-              content={
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background: "#2563eb",
-                    boxShadow: "0 0 0 4px white",
-                  }}
-                />
-              }
-            /> */}
-              <Marker
-                key={p.id}
-                position={{ lat: p.lat, lng: p.lng }}
-                onClick={() => removePin(p.id)}
-                // optional custom icon:
-                // icon={{
-                //   // path: google.maps.SymbolPath.CIRCLE,
-                //   path: "@/Asset/Image/station_pin_svg.svg",
-                //   scale: 8,
-                //   fillColor: "#2563eb",
-                //   fillOpacity: 1,
-                //   strokeWeight: 0,
-                // }}
-              />
-            </>
-          ))
-        )}
+        ))}
       </GoogleMap>
     </>
   );
 }
-
-// src/components/InteractiveMap.jsx
-// import React, { useState } from "react";
-// import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
-
-// export default function InteractiveMap() {
-//   // Only the core Maps JS API is needed now
-//   const { isLoaded, loadError } = useLoadScript({
-//     googleMapsApiKey: import.meta.env.VITE_GMAPS_KEY,
-//   });
-
-//   const [pins, setPins] = useState([]);
-
-//   if (loadError) return <p>Error loading map: {loadError.message}</p>;
-//   if (!isLoaded) return <p>Loading map…</p>;
-
-//   function handleMapClick(e) {
-//     if (!e.latLng) return;
-//     const lat = e.latLng.lat();
-//     const lng = e.latLng.lng();
-
-//     setPins((prev) => [...prev, { lat, lng }]);
-//     console.log("New pin:", lat, lng); // or POST to your backend, etc.
-//   }
-
-//   return (
-//     <GoogleMap
-//       mapContainerStyle={{ width: "100%", height: 400 }}
-//       center={{ lat: 30, lng: 70 }}
-//       zoom={15}
-//       onClick={handleMapClick}
-//     >
-//       {pins.map((p, i) => (
-//         <Marker key={i} position={{ lat: p.lat, lng: p.lng }} />
-//       ))}
-//     </GoogleMap>
-//   );
-// }
-
-// // src/components/InteractiveMap.jsx
-// import React, { useState } from "react";
-// import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
-
-// const LIBRARIES = ["places", "geometry"]; // keep outside component
-
-// export default function InteractiveMap() {
-//   const { isLoaded, loadError } = useLoadScript({
-//     googleMapsApiKey: import.meta.env.VITE_GMAPS_KEY,
-//     libraries: LIBRARIES,
-//   });
-
-//   const [pins, setPins] = useState([]);
-
-//   if (loadError) return <p>Error loading map: {loadError.message}</p>;
-//   if (!isLoaded) return <p>Loading map…</p>;
-
-//   async function handleMapClick(e) {
-//     if (!e.latLng) return;
-//     const lat = e.latLng.lat();
-//     const lng = e.latLng.lng();
-
-//     const geocoder = new window.google.maps.Geocoder();
-//     const res = await geocoder.geocode({ location: { lat, lng } });
-//     const address = res.results?.[0]?.formatted_address || "Unknown location";
-
-//     setPins((prev) => [...prev, { lat, lng, address }]);
-//   }
-
-//   return (
-//     <GoogleMap
-//       mapContainerStyle={{ width: "100%", height: 400 }}
-//       center={{ lat: 30, lng: 70 }}
-//       zoom={15}
-//       onClick={handleMapClick}
-//     >
-//       {pins.map((p, i) => (
-//         <Marker
-//           key={i}
-//           position={{ lat: p.lat, lng: p.lng }}
-//           title={p.address}
-//         />
-//       ))}
-//     </GoogleMap>
-//   );
-// }

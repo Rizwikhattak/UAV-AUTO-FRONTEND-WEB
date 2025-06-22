@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { motion } from "framer-motion";
+import { ROUTES } from "@/utils/constants";
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -89,34 +90,38 @@ const items = [
   {
     label: "Add Drone",
     imageSrc: "/Images/Add_Drone.png",
-    href: "/drone/AddDrone",
+    href: ROUTES.ADD_DRONE,
   },
   {
     label: "View Drones",
     imageSrc: "/Images/View_Drone.png",
-    href: "/drone/ViewDrone",
+    href: ROUTES.VIEW_DRONE,
   },
   {
     label: "Geofencing",
     imageSrc: "/Images/Add_Routes.png",
-    href: "/geofence/AddGeofence",
+    href: ROUTES.ADD_GEOFENCE,
   },
   {
     label: "View Geofence",
     imageSrc: "/Images/View_Routes.png",
-    href: "/geofence/ViewGeofence",
+    href: ROUTES.VIEW_GEOFENCE,
   },
   {
     label: "Plan Mission",
     imageSrc: "/Images/Plan_Mission.png",
-    href: "/missionPlan/AddMissionPlan",
+    href: ROUTES.ADD_MISSION_PLAN,
   },
   {
     label: "View Missions",
     imageSrc: "/Images/View_Mssions.png",
-    href: "/missionPlan/ViewMissionPlan",
+    href: ROUTES.VIEW_MISSION_PLAN,
   },
-  { label: "History", imageSrc: "/Images/History.png", href: "/history" },
+  {
+    label: "History",
+    imageSrc: "/Images/History.png",
+    href: ROUTES.VIEW_HISTORY,
+  },
 ];
 
 export default HomePage;

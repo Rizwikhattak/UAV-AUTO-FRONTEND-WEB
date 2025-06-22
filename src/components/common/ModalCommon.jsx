@@ -22,6 +22,8 @@ const ModalCommon = ({
   onCloseData,
   headerDescription,
   ModalStyle = "",
+  DialogHeaderComponent,
+  DialogFotterComponent,
   children,
 }) => {
   return (
@@ -35,11 +37,16 @@ const ModalCommon = ({
           // e.preventDefault();
         }}
       >
-        <DialogHeader className="">
-          <DialogTitle>{headerTitle}</DialogTitle>
-          <DialogDescription>{headerDescription}</DialogDescription>
-        </DialogHeader>
+        {DialogHeaderComponent ? (
+          DialogHeaderComponent
+        ) : (
+          <DialogHeader className="">
+            <DialogTitle>{headerTitle}</DialogTitle>
+            <DialogDescription>{headerDescription}</DialogDescription>
+          </DialogHeader>
+        )}
         <div>{children}</div>
+        {DialogFotterComponent && DialogFotterComponent}
       </DialogContent>
     </Dialog>
   );

@@ -2,24 +2,26 @@
 
 import { z } from "zod";
 
-export const addDroneSchema = z.object({
+export const insertDroneSchema = z.object({
   name: z
     .string()
     .min(2, { message: "Drone name must be at least 2 characters long." }),
 
-  speed: z.string().min(1, { message: "Speed must be at least 1 km/h." }),
+  speed: z.coerce
+    .string()
+    .min(1, { message: "Speed must be at least 1 km/h." }),
 
-  flight_duration: z
+  flight_duration: z.coerce
     .string()
     .min(1, { message: "Flight duration must be at least 1 hour." }),
 
-  ceiling: z
+  ceiling: z.coerce
     .string()
     .min(1, { message: "Ceiling height must be at least 1 meter." }),
 
-  fps: z.string().min(1, { message: "Camera FPS must be at least 1." }),
+  fps: z.coerce.string().min(1, { message: "Camera FPS must be at least 1." }),
 
-  station_id: z.string().min(1, { message: "Please select a station." }),
+  station_id: z.coerce.string().min(1, { message: "Please select a station." }),
 
   image: z.custom(
     (val) => {

@@ -7,17 +7,26 @@ import {
 import InputCommon from "@/components/common/InputCommon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { addDroneSchema } from "@/pages/Drone/DroneSchema";
-import { addDrone } from "@/store/Actions/droneActions";
+import { insertDroneSchema } from "@/pages/Drone/DroneSchema";
+import {
+  getDroneById,
+  insertDrone,
+  updateDrone,
+} from "@/store/Actions/droneActions";
 import { getAllStations } from "@/store/Actions/stationActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-const AddDronePage = () => {
+import { useParams, useRouter } from "next/navigation";
+import { ROUTES } from "@/utils/constants";
+import { SET_IMAGE_URL } from "@/utils/Helpers";
+const InsertDronePage = () => {
+  const params = useParams();
+  const droneId = params.id;
   const drone = useSelector((state) => state.drone);
+  console.log("Drone Data:", drone);
   const dispatch = useDispatch();
   const station = useSelector((state) => state.station);
   const initialState = {
@@ -31,14 +40,36 @@ const AddDronePage = () => {
   };
   const router = useRouter();
   const form = useForm({
-    resolver: zodResolver(addDroneSchema),
+    resolver: zodResolver(insertDroneSchema),
     defaultValues: initialState,
   });
 
   useEffect(() => {
     dispatch(getAllStations());
   }, [dispatch]);
-
+  useEffect(() => {
+    const fetchDroneById = async () => {
+      if (droneId) {
+        try {
+          const response = await dispatch(getDroneById(droneId)).unwrap();
+          console.log(response);
+          form.reset({
+            name: response?.data?.name || "",
+            speed: response?.data?.speed || "",
+            flight_duration: response?.data?.flight_duration || "",
+            ceiling: response?.data?.ceiling || "",
+            fps: response?.data?.fps || "",
+            station_id: response?.data?.station_id || "",
+            image: SET_IMAGE_URL(response?.data?.image_path) || "",
+          });
+          console.log("Fetched Drone Data:", drone);
+        } catch (err) {
+          console.error("Error fetching drone by ID:", err);
+        }
+      }
+    };
+    fetchDroneById();
+  }, [droneId, dispatch]);
   const handleFormSubmit = async (data) => {
     try {
       console.log("Form Submitted:", data);
@@ -46,8 +77,10 @@ const AddDronePage = () => {
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
       });
-      await dispatch(addDrone(formData)).unwrap();
-      router.push("/home");
+      droneId
+        ? await dispatch(updateDrone({ id: droneId, formData })).unwrap()
+        : await dispatch(insertDrone(formData)).unwrap();
+      router.push(ROUTES.HOME);
       form.reset();
     } catch (err) {
       console.log(err);
@@ -70,7 +103,9 @@ const AddDronePage = () => {
       >
         <div className="flex flex-col w-full lg:w-[60%] gap-4">
           <div className="content-header text-center">
-            <h1 className="text-xl font-bold">Add New Drone</h1>
+            <h1 className="text-xl font-bold">
+              {droneId ? "Update Drone" : "Add New Drone"}
+            </h1>
             <p>
               Configure and Deploy Your Drone for Optimal Mission Performance
             </p>
@@ -142,7 +177,7 @@ const AddDronePage = () => {
                 variant="hover-blue-full"
                 isLoading={drone.isPostLoading}
               >
-                Add Drone
+                {droneId ? "Update Drone" : "Add Drone"}
               </Button>
             </form>
           </Form>
@@ -151,18 +186,4 @@ const AddDronePage = () => {
     </AnimatePresence>
   );
 };
-const stationDropDownItems = [
-  {
-    name: "Shamsabad Station",
-    value: "shamsabadStation",
-  },
-  {
-    name: "Rehmanabad Station",
-    value: "rehmanabadStation",
-  },
-  {
-    name: "6th Road Station",
-    value: "sixthRoadStation",
-  },
-];
-export default AddDronePage;
+export default InsertDronePage;

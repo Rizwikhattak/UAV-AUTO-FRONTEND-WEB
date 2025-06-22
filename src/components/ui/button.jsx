@@ -14,7 +14,7 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground cursor-pointer shadow hover:bg-primary/90",
         destructive:
-          "bg-destructive border border-destructive cursor-pointer text-destructive-foreground shadow-sm hover:bg-transparent hover:text-destructive transition-all duration-200",
+          "bg-destructive border border-destructive cursor-pointer text-white shadow-sm hover:bg-transparent hover:text-destructive transition-all duration-200",
         "hover-outline-destructive":
           "bg-transparent border border-destructive cursor-pointer text-destructive shadow-sm hover:bg-accent transition-all duration-200",
         outline:

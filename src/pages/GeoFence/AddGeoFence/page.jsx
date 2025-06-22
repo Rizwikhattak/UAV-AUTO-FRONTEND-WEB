@@ -4,52 +4,73 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { getAllStations } from "@/store/Actions/stationActions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { addDrone } from "@/store/Actions/droneActions";
 import Spinner from "@/components/common/SpinnerCommon";
 import { InputCommon } from "@/components/common/FormCommons";
 import InteractiveMap from "@/components/common/InteractiveMap";
+import FullScreenMapModal from "@/components/common/FullScreenMapModal";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Image from "next/image";
 import { geofenceSchema } from "@/pages/GeoFence/GeofenceSchema";
+import { insertGeofence } from "@/store/Actions/geofenceActions";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/utils/constants";
+
 const AddGeofence = () => {
-  const drone = useSelector((state) => state.drone);
+  const geofence = useSelector((state) => state.geofence);
   const dispatch = useDispatch();
   const [inputImage, setInputImage] = useState(null);
   const station = useSelector((state) => state.station);
+  const router = useRouter();
+  // Modal states
+  const [showStationModal, setShowStationModal] = useState(false);
+  const [showRouteModal, setShowRouteModal] = useState(false);
+
+  // Pins state
+  const [stationPins, setStationPins] = useState([]);
+  const [routePins, setRoutePins] = useState([]);
+
   console.log("Stationnnnnnnnnnnnnnnn:", station);
+
   const initialState = {
     name: "",
-    speed: "",
-    flight_duration: "",
-    ceiling: "",
-    fps: "",
-    station_id: "",
-    image: "",
+    rows: "",
+    columns: "",
+    stationPins: [],
+    routePins: [],
   };
 
   const form = useForm({
     resolver: zodResolver(geofenceSchema),
     defaultValues: initialState,
   });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    clearErrors,
+  } = form;
 
-  // useEffect(() => {
-  //   dispatch(getAllStations());
-  // }, [dispatch]);
   console.log("Stations", station);
 
   const handleFormSubmit = async (data) => {
     try {
       console.log("Form Submitted:", data);
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      await dispatch(addDrone(formData)).unwrap();
-      form.reset();
+      const payload = {
+        name: data.name,
+        rows: data.rows,
+        columns: data.columns,
+        station_latitude: stationPins[0]?.lat || 0,
+        station_longitude: stationPins[0]?.lng || 0,
+        locations: data.routePins.map((pin) => ({
+          latitude: pin.lat,
+          longitude: pin.lng,
+        })),
+      };
+      await dispatch(insertGeofence(payload)).unwrap();
+      router.push(ROUTES.HOME);
+      form.reset(initialState);
     } catch (err) {
       console.log(err);
     }
@@ -59,30 +80,63 @@ const AddGeofence = () => {
     console.log("Validation Errors:", errors);
   };
 
+  const handleStationPins = (pins) => {
+    setStationPins(pins);
+    form.setValue("stationPins", pins);
+    clearErrors("stationPins");
+    setShowStationModal(false);
+  };
+
+  const handleRoutePins = (pins) => {
+    setRoutePins(pins);
+    form.setValue("routePins", pins);
+    clearErrors("routePins");
+    setShowRouteModal(false);
+  };
+
+  // Combine all pins for display
+  const allPins = [
+    ...stationPins.map((pin) => ({ ...pin, type: "station" })),
+    ...routePins.map((pin) => ({ ...pin, type: "route" })),
+  ];
+
   return (
     <div className="flex justify-center p-5 sm:p-10 bg-[--color-avocado-100]">
       <div className="flex flex-col w-full sm:w-[70%] gap-4">
         <div className="content-header text-center">
           <h1 className="text-xl font-bold">Geofence</h1>
-
-          {/* <p>Configure and Deploy Your Drone for Optimal Mission Performance</p> */}
         </div>
+
         <Form {...form} className="w-full">
           <form
             onSubmit={form.handleSubmit(handleFormSubmit, handleError)}
             className="space-y-4"
           >
-            {/* <CardInputCommon control={form.control} /> */}
             <InputCommon
               control={form.control}
               name="name"
               label="Name"
               placeholder="Enter Geofence name"
             />
+            <InputCommon
+              control={form.control}
+              name="rows"
+              label="Rows"
+              placeholder="Enter Total No. of Panel Rows"
+            />
+            <InputCommon
+              control={form.control}
+              name="columns"
+              label="Columns"
+              placeholder="Enter Total No. of Panel Columns"
+            />
+
             <div className="flex flex-col justify-start mb-2">
               <Button
+                type="button"
                 variant="link"
                 className="flex justify-start items-center gap-2 w-full"
+                onClick={() => setShowStationModal(true)}
               >
                 <span className="relative w-8 h-8">
                   <Image
@@ -92,11 +146,21 @@ const AddGeofence = () => {
                     className="w-8 h-8 object-cover"
                   />
                 </span>
-                <span>Add a Station</span>
+                <span>
+                  Add a Station{" "}
+                  {stationPins.length > 0 ? "(1 set)" : "(none set)"}
+                </span>
               </Button>
+              {errors.stationPins && (
+                <p className="text-red-500 text-sm pl-5">
+                  {errors.stationPins.message}
+                </p>
+              )}
               <Button
+                type="button"
                 variant="link"
                 className="flex justify-start items-center gap-2 w-full"
+                onClick={() => setShowRouteModal(true)}
               >
                 <span className="relative w-8 h-8">
                   <Image
@@ -106,40 +170,52 @@ const AddGeofence = () => {
                     className="w-8 h-8 object-cover"
                   />
                 </span>
-                <span>Add Geofencing points</span>
+                <span>Add Geofencing points ({routePins.length} added)</span>
               </Button>
+              {errors.routePins && (
+                <p className="text-red-500 text-sm pl-5">
+                  {errors.routePins.message}
+                </p>
+              )}
             </div>
 
-            <div className="card relative mx-auto h-44 w-80 rounded-lg shadow-xl bg-blue-950">
-              <InteractiveMap />
+            <div className="card relative mx-auto h-44 w-80 sm:h-[16rem] sm:w-[35rem] rounded-lg shadow-xl bg-blue-950 overflow-hidden">
+              <InteractiveMap displayOnly={true} pins={allPins} />
             </div>
 
             <Button
               type="submit"
-              variant={drone.loading ? "outline-full" : "hover-blue-full"}
-              disabled={drone.loading}
+              variant="hover-blue-full"
+              isLoading={geofence.isPostLoading}
               className="!mt-10"
             >
-              {drone.loading ? <Spinner /> : "Add Geofence"}
+              Add Geofence
             </Button>
           </form>
         </Form>
+
+        {/* Station Modal */}
+        <FullScreenMapModal
+          isOpen={showStationModal}
+          onClose={() => setShowStationModal(false)}
+          onSave={handleStationPins}
+          title="Add Station"
+          mode="station"
+          existingPins={stationPins}
+        />
+
+        {/* Route Modal */}
+        <FullScreenMapModal
+          isOpen={showRouteModal}
+          onClose={() => setShowRouteModal(false)}
+          onSave={handleRoutePins}
+          title="Add Geofencing Points"
+          mode="route"
+          existingPins={routePins}
+        />
       </div>
     </div>
   );
 };
-const stationDropDownItems = [
-  {
-    name: "Shamsabad Station",
-    value: "shamsabadStation",
-  },
-  {
-    name: "Rehmanabad Station",
-    value: "rehmanabadStation",
-  },
-  {
-    name: "6th Road Station",
-    value: "sixthRoadStation",
-  },
-];
+
 export default AddGeofence;

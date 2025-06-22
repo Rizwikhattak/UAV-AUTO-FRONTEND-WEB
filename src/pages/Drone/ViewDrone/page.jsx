@@ -1,32 +1,70 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { DataTableCommon } from "@/components/common/DataTableCommon";
 import { DataTableColumnHeaderCommon } from "@/components/common/DataTableColumnHeaderCommon";
 import DataTableFiltersCommon from "@/components/common/DataTableFiltersCommon";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteDrone, getAllDrones } from "@/store/Actions/droneActions";
+import { SET_IMAGE_URL } from "@/utils/Helpers";
+import { Pencil, Trash2 } from "lucide-react";
+import { set } from "date-fns";
+import { filterDrones } from "@/store/Reducers/droneSlice";
+import DeleteDroneModal from "@/pages/Drone/DeleteDroneModal";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/utils/constants";
 
 const ViewDronePage = () => {
+  const drones = useSelector((state) => state.drone);
+  const dispatch = useDispatch();
+  const router = useRouter();
   const filters = ["Speed", "Flight Duration", "Ceiling"];
   const [selectedFilter, setSelectedFilter] = useState(filters[0]);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [selectedDrone, setSelectedDrone] = useState(null);
+
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
+    dispatch(filterDrones({ filter: selectedFilter }));
   };
+  const handleDroneEdit = (drone) => {
+    console.log("Edit drone:", drone.id);
+    // add navigation or modal logic here
+    router.push(`${ROUTES.EDIT_DRONE}/${drone.id}`);
+
+  };
+
+  const handleDroneDelete = async () => {
+    console.log("Delete drone:", selectedDrone.id);
+    try {
+      await dispatch(deleteDrone(selectedDrone.id)).unwrap();
+      dispatch(getAllDrones());
+      setOpenDeleteModal(false);
+    } catch (err) {
+      console.error("Error deleting drone:", err);
+    }
+  };
+  useEffect(() => {
+    dispatch(getAllDrones());
+  }, []);
+
   const columns = [
-    // Bank Name
     {
-      accessorKey: "image",
+      accessorKey: "image_path",
       header: ({ column }) => <h1 className="font-bold text-lg py-3">Image</h1>,
       enableSorting: false,
       size: 100, // <-- Set the "Image" column to 100px fixed width
       minSize: 100, // enforce 100px minimum
       maxSize: 100,
       cell: ({ row }) => {
-        const src = row.getValue("image");
+        const src = row.getValue("image_path");
+        const image_url = SET_IMAGE_URL(src);
+        console.log("image_url", image_url, src);
         return (
           <div className="relative w-12 sm:w-32 h-12 sm:h-32 rounded-lg">
             <Image
-              src={src}
+              src={image_url}
               alt="Sample Image"
               fill
               className="object-contain"
@@ -41,11 +79,11 @@ const ViewDronePage = () => {
       accessorKey: "name",
       header: ({ column }) => <h1 className="font-bold text-lg">Name</h1>,
       cell: ({ row }) => {
-        const { name, speed, flightDuration, ceiling } = row.original;
+        const { name, speed, flight_duration, ceiling } = row.original;
         return (
           <div className="flex flex-col gap-3 px-4">
             <div>
-              <h1>{name}</h1>
+              <h1 className="text-base sm:text-xl">{name}</h1>
             </div>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -71,7 +109,7 @@ const ViewDronePage = () => {
                   />
                 </div>
                 <div>
-                  <p>{flightDuration}</p>
+                  <p>{flight_duration}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -92,6 +130,35 @@ const ViewDronePage = () => {
         );
       },
       enableSorting: false,
+    },
+    {
+      id: "actions",
+      header: () => <h1 className="font-bold text-lg text-center">Actions</h1>,
+      cell: ({ row }) => {
+        const drone = row.original;
+
+        return (
+          <div className="flex items-center justify-center gap-4">
+            <button
+              className="text-blue-600 hover:text-blue-800 cursor-pointer"
+              onClick={() => handleDroneEdit(drone)}
+            >
+              <Pencil size={20} />
+            </button>
+            <button
+              className="text-red-600 hover:text-red-800 cursor-pointer"
+              onClick={() => {
+                setSelectedDrone(drone);
+                setOpenDeleteModal(true);
+              }}
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 100,
     },
   ];
   return (
@@ -118,8 +185,8 @@ const ViewDronePage = () => {
         <DataTableCommon
           // filters={filters}
           columns={columns}
-          data={drones}
-          // isLoading={bankAccountsData.isLoading}
+          data={drones.data}
+          isLoading={drones.isLoading}
           // selectedFilter={selectedFilter}
           // setSelectedFilter={setSelectedFilter}
           // totalDataCount={bankAccountsData.count}
@@ -128,32 +195,13 @@ const ViewDronePage = () => {
           // }
         />
       </div>
-      {/* <div>
-        <div className="filters flex items-center gap-3">
-          <Button variant="hover-blue-fit">Speed</Button>
-          <Button variant="hover-blue-fit">Speed</Button>
-          <Button variant="hover-blue-fit">Speed</Button>
-        </div>
-        <div className="grid grid-cols-12">
-          <div className="col-span-3">
-            <h1 className="font-semibold">Image</h1>
-          </div>
-          <div className="col-span-9">
-            <h1 className="font-semibold">Name</h1>
-          </div>
-          <div className="relative drone-image col-span-3 h-40">
-            <Image
-              src="/Images/dashboard_drone.png"
-              alt="Sample Image"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="rest-content col-span-9">
-            <h1>Phantom X7</h1>
-          </div>
-        </div>
-      </div> */}
+      <DeleteDroneModal
+        openDeleteModal={openDeleteModal}
+        setOpenDeleteModal={setOpenDeleteModal}
+        selectedDrone={selectedDrone}
+        handleDroneDelete={handleDroneDelete}
+        isLoading={drones.isPostLoading}
+      />
     </div>
   );
 };
