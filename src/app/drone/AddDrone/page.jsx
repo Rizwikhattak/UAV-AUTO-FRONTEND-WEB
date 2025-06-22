@@ -1,4 +1,4 @@
-import InsertDronePage from "@/pages/Drone/AddDrone/page";
+import InsertDronePage from "@/components/Drone/AddDrone/page";
 import React from "react";
 
 const page = () => {

@@ -11,7 +11,7 @@ import { SET_IMAGE_URL } from "@/utils/Helpers";
 import { Pencil, Trash2 } from "lucide-react";
 import { set } from "date-fns";
 import { filterDrones } from "@/store/Reducers/droneSlice";
-import DeleteDroneModal from "@/pages/Drone/DeleteDroneModal";
+import DeleteDroneModal from "@/components/Drone/DeleteDroneModal";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/utils/constants";
 
@@ -32,7 +32,6 @@ const ViewDronePage = () => {
     console.log("Edit drone:", drone.id);
     // add navigation or modal logic here
     router.push(`${ROUTES.EDIT_DRONE}/${drone.id}`);
-
   };
 
   const handleDroneDelete = async () => {

@@ -7,7 +7,7 @@ import {
 import InputCommon from "@/components/common/InputCommon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { insertDroneSchema } from "@/pages/Drone/DroneSchema";
+import { insertDroneSchema } from "@/components/Drone/DroneSchema";
 import {
   getDroneById,
   insertDrone,

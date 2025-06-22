@@ -19,6 +19,7 @@ const FullScreenMapModal = ({
   title,
   mode = "route",
   existingPins = [],
+  handleDeletePins = () => {}, // Function to handle pin deletion
 }) => {
   const [pins, setPins] = useState(existingPins);
 
@@ -55,7 +56,7 @@ const FullScreenMapModal = ({
             <Button
               onClick={handleSave}
               className="flex items-center gap-2 ml-4"
-              variant="default"
+              variant="hover-blue-fit"
             >
               <Save size={16} />
               Save ({pins.length})
@@ -73,7 +74,11 @@ const FullScreenMapModal = ({
               <Button onClick={onClose} variant="outline">
                 Cancel
               </Button>
-              <Button onClick={handleSave} className="flex items-center gap-2">
+              <Button
+                onClick={handleSave}
+                className="flex items-center gap-2"
+                variant="hover-blue-fit"
+              >
                 <Save size={16} />
                 Save Points
               </Button>
@@ -87,6 +92,7 @@ const FullScreenMapModal = ({
             pins={pins}
             onPinsChange={handlePinsChange}
             mode={mode}
+            handleDeletePins={handleDeletePins}
           />
         </div>
       </ModalCommon>

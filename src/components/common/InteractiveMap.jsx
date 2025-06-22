@@ -7,6 +7,7 @@ export default function InteractiveMap({
   pins = [],
   onPinsChange,
   mode = "route", // "station" or "route"
+  handleDeletePins,
 }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_GMAPS_KEY,
@@ -70,6 +71,8 @@ export default function InteractiveMap({
 
     const updatedPins = localPins.filter((m) => m.id !== id);
     setLocalPins(updatedPins);
+    const deletedPin = localPins.find((m) => m.id === id);
+    handleDeletePins(deletedPin);
 
     // Notify parent component
     if (onPinsChange) {

@@ -1,4 +1,4 @@
-import ViewHistory from "@/pages/History/page";
+import ViewHistory from "@/components/History/page";
 import React from "react";
 
 const page = () => {

@@ -51,6 +51,7 @@ export const ROUTES = {
   EDIT_DRONE: "/drone/EditDrone",
   ADD_GEOFENCE: "/geofence/AddGeofence",
   VIEW_GEOFENCE: "/geofence/ViewGeofence",
+  EDIT_GEOFENCE: "/geofence/EditGeofence",
   ADD_MISSION_PLAN: "/missionPlan/AddMissionPlan",
   VIEW_MISSION_PLAN: "/missionPlan/ViewMissionPlan",
   VIEW_HISTORY: "/history",
@@ -71,6 +72,8 @@ export const DRONE_APIS = {
 };
 export const GEOFENCE_APIS = {
   INSERT_GEOFENCE: "insert_route",
+  UPDATE_GEOFENCE: "update_route_by_id",
   GET_ALL_GEOFENCES: "get_all_routes_with_location_pins",
+  GET_GEOFENCE_BY_ID: "get_route_by_id",
   DELETE_GEOFENCE: "delete_route_by_id",
 };

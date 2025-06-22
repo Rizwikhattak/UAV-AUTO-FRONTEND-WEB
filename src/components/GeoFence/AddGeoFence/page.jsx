@@ -11,12 +11,19 @@ import FullScreenMapModal from "@/components/common/FullScreenMapModal";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Image from "next/image";
-import { geofenceSchema } from "@/pages/GeoFence/GeofenceSchema";
-import { insertGeofence } from "@/store/Actions/geofenceActions";
-import { useRouter } from "next/navigation";
+import { geofenceSchema } from "@/components/GeoFence/GeofenceSchema";
+import {
+  getGeofenceById,
+  insertGeofence,
+  updateGeofence,
+} from "@/store/Actions/geofenceActions";
+import { useParams, useRouter } from "next/navigation";
 import { ROUTES } from "@/utils/constants";
 
 const AddGeofence = () => {
+  const params = useParams();
+  const geofenceId = params.id;
+  console.log("Geofence ID:", geofenceId);
   const geofence = useSelector((state) => state.geofence);
   const dispatch = useDispatch();
   const [inputImage, setInputImage] = useState(null);
@@ -29,7 +36,12 @@ const AddGeofence = () => {
   // Pins state
   const [stationPins, setStationPins] = useState([]);
   const [routePins, setRoutePins] = useState([]);
-
+  const [deletedPins, setDeletedPins] = useState([]);
+  // Combine all pins for display
+  const allPins = [
+    ...stationPins.map((pin) => ({ ...pin, type: "station" })),
+    ...routePins.map((pin) => ({ ...pin, type: "route" })),
+  ];
   console.log("Stationnnnnnnnnnnnnnnn:", station);
 
   const initialState = {
@@ -63,12 +75,26 @@ const AddGeofence = () => {
         columns: data.columns,
         station_latitude: stationPins[0]?.lat || 0,
         station_longitude: stationPins[0]?.lng || 0,
-        locations: data.routePins.map((pin) => ({
-          latitude: pin.lat,
-          longitude: pin.lng,
-        })),
+        deleted_pins: deletedPins.map((pin) => pin.location_pin_id),
+        locations: data.routePins.map((pin) => {
+          if (pin.location_pin_id) {
+            return {
+              location_pin_id: pin.location_pin_id,
+              latitude: pin.lat,
+              longitude: pin.lng,
+            };
+          }
+          return {
+            latitude: pin.lat,
+            longitude: pin.lng,
+          };
+        }),
       };
-      await dispatch(insertGeofence(payload)).unwrap();
+      geofenceId
+        ? await dispatch(
+            updateGeofence({ ...payload, id: geofenceId })
+          ).unwrap()
+        : await dispatch(insertGeofence(payload)).unwrap();
       router.push(ROUTES.HOME);
       form.reset(initialState);
     } catch (err) {
@@ -93,13 +119,47 @@ const AddGeofence = () => {
     clearErrors("routePins");
     setShowRouteModal(false);
   };
-
-  // Combine all pins for display
-  const allPins = [
-    ...stationPins.map((pin) => ({ ...pin, type: "station" })),
-    ...routePins.map((pin) => ({ ...pin, type: "route" })),
-  ];
-
+  const handleDeletePins = (pins) => {
+    setDeletedPins((oldPins) => (pins ? [...oldPins, pins] : oldPins));
+  };
+  console.log("Deleted Pins:", deletedPins);
+  useEffect(() => {
+    const fetchGeofenceById = async () => {
+      try {
+        if (geofenceId) {
+          const geofenceData = await dispatch(
+            getGeofenceById(geofenceId)
+          ).unwrap();
+          console.log("Fetched Geofence Data:", geofenceData);
+          setValue("name", geofenceData?.data?.name);
+          setValue("rows", geofenceData?.data?.rows);
+          setValue("columns", geofenceData?.data?.columns);
+          const respStationPins = [
+            {
+              id: geofenceData?.data?.station_id,
+              lat: geofenceData?.data?.station_latitude,
+              lng: geofenceData?.data?.station_longitude,
+              type: "station",
+            },
+          ];
+          const respRoutePins = geofenceData?.data?.locations.map((loc) => ({
+            id: loc.location_pin_id,
+            location_pin_id: loc.location_pin_id,
+            lat: loc.latitude,
+            lng: loc.longitude,
+            type: "route",
+          }));
+          setStationPins(respStationPins);
+          setRoutePins(respRoutePins);
+          form.setValue("stationPins", respStationPins);
+          form.setValue("routePins", respRoutePins);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchGeofenceById();
+  }, [geofenceId]);
   return (
     <div className="flex justify-center p-5 sm:p-10 bg-[--color-avocado-100]">
       <div className="flex flex-col w-full sm:w-[70%] gap-4">
@@ -147,7 +207,7 @@ const AddGeofence = () => {
                   />
                 </span>
                 <span>
-                  Add a Station{" "}
+                  {geofenceId ? "Update Station" : "Add a Station"}{" "}
                   {stationPins.length > 0 ? "(1 set)" : "(none set)"}
                 </span>
               </Button>
@@ -170,7 +230,12 @@ const AddGeofence = () => {
                     className="w-8 h-8 object-cover"
                   />
                 </span>
-                <span>Add Geofencing points ({routePins.length} added)</span>
+                <span>
+                  {geofenceId
+                    ? "Update Geofencing points"
+                    : "Add Geofencing points"}{" "}
+                  ({routePins.length} added)
+                </span>
               </Button>
               {errors.routePins && (
                 <p className="text-red-500 text-sm pl-5">
@@ -189,7 +254,7 @@ const AddGeofence = () => {
               isLoading={geofence.isPostLoading}
               className="!mt-10"
             >
-              Add Geofence
+              {geofenceId ? "Update Geofence" : "Add Geofence"}
             </Button>
           </form>
         </Form>
@@ -212,6 +277,7 @@ const AddGeofence = () => {
           title="Add Geofencing Points"
           mode="route"
           existingPins={routePins}
+          handleDeletePins={handleDeletePins}
         />
       </div>
     </div>

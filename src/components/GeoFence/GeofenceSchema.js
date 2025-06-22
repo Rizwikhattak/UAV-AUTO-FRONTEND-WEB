@@ -15,7 +15,7 @@ export const geofenceSchema = z.object({
       z.object({
         lat: z.number(),
         lng: z.number(),
-        id: z.string().optional(),
+        id: z.coerce.string().optional(),
       })
     )
     .min(1, { message: "At least one station pin must be set." }),
@@ -25,7 +25,8 @@ export const geofenceSchema = z.object({
       z.object({
         lat: z.number(),
         lng: z.number(),
-        id: z.string().optional(),
+        id: z.coerce.string().optional(),
+        location_pin_id: z.coerce.string().optional(),
       })
     )
     .min(1, { message: "At least one geofencing point must be added." }),

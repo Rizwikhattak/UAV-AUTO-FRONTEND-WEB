@@ -1,5 +1,5 @@
 "use client";
-import { loginSchema } from "@/pages/Authentication/LoginPage/LoginScheema";
+import { loginSchema } from "@/components/Authentication/LoginPage/LoginScheema";
 import InputCommon from "@/components/common/InputCommon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";

@@ -1,4 +1,4 @@
-import ViewMissionPlans from "@/pages/PlanMissions/ViewMissionPlans";
+import ViewMissionPlans from "@/components/PlanMissions/ViewMissionPlans";
 import React from "react";
 
 const page = () => {

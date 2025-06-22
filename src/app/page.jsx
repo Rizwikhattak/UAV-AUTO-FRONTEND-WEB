@@ -1,4 +1,4 @@
-import LoginPage from "@/pages/Authentication/LoginPage/page";
+import LoginPage from "@/components/Authentication/LoginPage/page";
 
 export default function Home() {
   return <LoginPage />;

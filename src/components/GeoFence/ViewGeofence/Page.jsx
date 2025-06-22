@@ -20,14 +20,21 @@ import {
 import FilterCommon from "@/components/common/FilterCommon";
 import { filterGeofences } from "@/store/Reducers/geofenceSlice";
 import { Pencil, Trash2 } from "lucide-react";
-import DeleteGeofenceModal from "@/pages/GeoFence/DeleteGeofenceModal";
+import DeleteGeofenceModal from "@/components/GeoFence/DeleteGeofenceModal";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/utils/constants";
 const ViewGeofence = () => {
   const dispatch = useDispatch();
   const geofences = useSelector((state) => state.geofence);
+  const router = useRouter();
   const [selectedGeofence, setSelectedGeofence] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const handleGeofenceEdit = (geofennce) => {};
+  const handleGeofenceEdit = (geofennce) => {
+    console.log("Edit geofence:", geofennce);
+    setSelectedGeofence(geofennce);
+    router.push(`${ROUTES.EDIT_GEOFENCE}/${geofennce.id}`);
+  };
   const handleGeofenceDelete = async (geofennce) => {
     try {
       console.log("Delete geofence:", selectedGeofence.id);
@@ -62,6 +69,7 @@ const ViewGeofence = () => {
       header: ({ column }) => <h1 className="text-lg py-3">Drones</h1>,
       cell: ({ row }) => {
         const value = row.getValue("number_of_drones");
+        console.log("Number of drones:", value);
         return <span className="ml-4 w-full">{value}</span>;
       },
       enableSorting: false,
