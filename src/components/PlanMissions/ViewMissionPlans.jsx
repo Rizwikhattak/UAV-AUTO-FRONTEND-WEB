@@ -1,69 +1,110 @@
 "use client";
 import { DataTableColumnHeaderCommon } from "@/components/common/DataTableColumnHeaderCommon";
 import { DataTableCommon } from "@/components/common/DataTableCommon";
+import FilterCommon from "@/components/common/FilterCommon";
+import DeleteMissionModal from "@/components/PlanMissions/DeleteMissionModal";
 // Update these imports to your mission plan-specific components if available
 // import { DeleteMissionPlanDialog } from "@/components/missionPlan/DeleteMissionPlanDialog";
 // import { EditMissionPlanSheet } from "@/components/missionPlan/EditMissionPlanSheet";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from "lucide-react";
+import {
+  deleteMissionPlan,
+  getAllMissionPlans,
+} from "@/store/Actions/planMissionActions";
+import { filterMissions } from "@/store/Reducers/planMissionSlice";
+import { ROUTES } from "@/utils/constants";
+import { Pencil, Trash2 } from "lucide-react";
 import { Edit } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const ViewMissionPlans = () => {
   const dispatch = useDispatch();
+  const planMissions = useSelector((state) => state.planMission);
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [selectedMission, setSelectedMission] = React.useState(null);
+  const router = useRouter();
+  const handleMissionEdit = (mission) => {
+    router.push(`${ROUTES.EDIT_MISSION_PLAN}/${mission.id}`);
+  };
+  const handleMissionDelete = async () => {
+    try {
+      if (selectedMission) {
+        await dispatch(deleteMissionPlan(selectedMission.id)).unwrap();
+        setOpenDeleteModal(false);
+        setSelectedMission(null);
+        // Optionally, you can refetch the mission plans after deletion
+        dispatch(getAllMissionPlans());
+      }
+    } catch (error) {
+      console.error("Error deleting mission plan:", error);
+    }
+  };
+  const handleFilterChange = (filterValue) => {
+    dispatch(filterMissions({ filter: filterValue }));
+  };
 
-  // Dummy mission plan data with two statuses: "not set" and "active"
-  const missionPlans = [
+  useEffect(() => {
+    dispatch(getAllMissionPlans());
+  }, [dispatch]);
+  const tableColumns = [
     {
-      id: 1,
-      name: "CUST SOLAR PANEL INSPECTION",
-      geofence: "Shamsabad to Rehmanabad route",
-      landing_station: "Committee Chowk station",
-      departure_station: "Faizabad station",
-      drone_name: "Falcon X",
-      status: "not set",
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeaderCommon column={column} title="Name" />
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue("name");
+        return <span className="ml-4 w-full">{value}</span>;
+      },
+      enableSorting: false,
     },
+
+    // {
+    //   accessorKey: "status",
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeaderCommon column={column} title="Status" />
+    //   ),
+    //   cell: ({ row }) => {
+    //     const value = row.getValue("status");
+    //     return <span className="ml-4 w-full">{value}</span>;
+    //   },
+    //   enableSorting: false,
+    // },
     {
-      id: 2,
-      name: "BIIT SOLAR PANEL INSPECTION",
-      geofence: "Shamsabad to Rehmanabad route",
-      landing_station: "Committee Chowk station",
-      departure_station: "Faizabad station",
-      drone_name: "Falcon X",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "NUST SOLAR PANEL INSPECTION",
-      geofence: "G-9 to Blue Area route",
-      landing_station: "G-9 station",
-      departure_station: "Blue Area station",
-      drone_name: "Eagle Eye",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Efficiency Analysis of CUST",
-      geofence: "D Ground to Satellite Town route",
-      landing_station: "D Ground station",
-      departure_station: "Satellite Town station",
-      drone_name: "Falcon X",
-      status: "not set",
+      id: "actions",
+      header: () => <h1 className="font-bold text-lg text-center">Actions</h1>,
+      cell: ({ row }) => {
+        const mission = row.original;
+
+        return (
+          <div className="flex items-center justify-center gap-4">
+            <button
+              className="text-blue-600 hover:text-blue-800 cursor-pointer"
+              onClick={() => handleMissionEdit(mission)}
+            >
+              <Pencil size={20} />
+            </button>
+            <button
+              className="text-red-600 hover:text-red-800 cursor-pointer"
+              onClick={() => {
+                setSelectedMission(mission);
+                setOpenDeleteModal(true);
+              }}
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 100,
     },
   ];
-
-  console.log("MISSION PLANS:", missionPlans);
-
-  // If you plan to fetch mission plans from a store or API, dispatch that action here.
-  // For now, we're using dummy data.
-  useEffect(() => {
-    // dispatch(getAllMissionPlans());
-  }, [dispatch]);
-
   return (
     <section className="view-mission-plans-page flex flex-col items-center h-screen justify-center">
       <div className="w-full px-10 py-5 space-y-5">
@@ -83,130 +124,24 @@ const ViewMissionPlans = () => {
             />
           </div>
           */}
-          <div className="flex items-center gap-1 bg-white rounded-full border px-3">
-            <span className="relative w-4 h-4">
-              <Image src="/Images/Search.png" fill className="object-cover" />
-            </span>
-            <Input
-              className="!w-60 !h-10 !px-2 rounded-lg border-none !bg-white"
-              placeholder="Search Missions"
-            />
-          </div>
+          <FilterCommon handleFilterChange={handleFilterChange} />
         </div>
         <DataTableCommon
           columns={tableColumns}
-          data={missionPlans}
+          data={planMissions.data}
+          isLoading={planMissions.isLoading}
           className="w-full"
+        />
+        <DeleteMissionModal
+          openDeleteModal={openDeleteModal}
+          setOpenDeleteModal={setOpenDeleteModal}
+          selectedMission={selectedMission}
+          handleMissionDelete={handleMissionDelete}
+          isLoading={planMissions.isPostLoading}
         />
       </div>
     </section>
   );
 };
-
-const tableColumns = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
-  // {
-  //   accessorKey: "id",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeaderCommon column={column} title="ID" />
-  //   ),
-  //   cell: ({ row }) => {
-  //     const value = row.getValue("id");
-  //     return <span className="ml-4 w-full">{value}</span>;
-  //   },
-  // },
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeaderCommon column={column} title="Name" />
-    ),
-    cell: ({ row }) => {
-      const value = row.getValue("name");
-      return <span className="ml-4 w-full underline">{value}</span>;
-    },
-    enableSorting: false,
-  },
-
-  // {
-  //   accessorKey: "geofence",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeaderCommon column={column} title="Geofence" />
-  //   ),
-  //   cell: ({ row }) => {
-  //     const value = row.getValue("geofence");
-  //     return <span className="ml-4 w-full">{value}</span>;
-  //   },
-  //   enableSorting: false,
-  // },
-  // {
-  //   accessorKey: "drone_name",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeaderCommon column={column} title="Drone" />
-  //   ),
-  //   cell: ({ row }) => {
-  //     const value = row.getValue("drone_name");
-  //     return <span className="ml-4 w-full">{value}</span>;
-  //   },
-  //   enableSorting: false,
-  // },
-
-  // {
-  //   accessorKey: "status",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeaderCommon column={column} title="Status" />
-  //   ),
-  //   cell: ({ row }) => {
-  //     const value = row.getValue("status");
-  //     return <span className="ml-4 w-full">{value}</span>;
-  //   },
-  //   enableSorting: false,
-  // },
-  // {
-  //   id: "actions",
-  //   header: "Actions",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     // Spread the entire row data for editing/deleting
-  //     const rowData = { ...row.original };
-  //     console.log("Mission Plan Data:", rowData);
-
-  //     return (
-  //       <div className="flex items-center gap-3">
-  //         {/* <EditDroneSheet triggerButton={<Edit />} droneData={rowData} /> */}
-  //         {/* <DeleteDroneDialog triggerButton={<Trash2 />} droneData={rowData} /> */}
-  //         {/* <EditMissionPlanSheet
-  //           triggerButton={<Edit />}
-  //           missionPlanData={rowData}
-  //         />
-  //         <DeleteMissionPlanDialog
-  //           triggerButton={<Trash2 />}
-  //           missionPlanData={rowData}
-  //         /> */}
-  //       </div>
-  //     );
-  //   },
-  // },
-];
 
 export default ViewMissionPlans;

@@ -7,12 +7,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
 import VideoPreviewCard from "@/components/common/VideoPreviewCard"; // Adjust path as needed
-import { uploadMissionVideo } from "@/store/Actions/planMissionActions";
+import {
+  getMissionHistory,
+  getMissionHistoryById,
+  uploadMissionVideo,
+} from "@/store/Actions/planMissionActions";
 import { ROUTES } from "@/utils/constants";
+import { SET_IMAGE_URL } from "@/utils/Helpers";
 
-export default function ActiveMissionPlan() {
+export default function SpecificHistory() {
   const dispatch = useDispatch();
-  console.log("CAAAAALLLLLEEEEED");
   const params = useParams();
   const missionId = params.id;
   console.log("Mission ID:", missionId);
@@ -28,44 +32,26 @@ export default function ActiveMissionPlan() {
     total: null,
   });
   const [missionVideoId, setMissionVideoId] = useState(null);
-  // Submit handler
-  const handleUpload = async () => {
-    try {
-      // Create form object
-      const formData = new FormData();
+  const [missionVideoUrl, setMissionVideoUrl] = useState("");
 
-      // Add mission planner ID
-      if (missionId) {
-        formData.set("mission_planner_id", missionId);
+  useEffect(() => {
+    const fetchHistoryById = async () => {
+      try {
+        const resp = await dispatch(getMissionHistoryById(missionId)).unwrap();
+        setPanelCounts({
+          clean: resp?.data?.clean,
+          damage: resp?.data?.damaged,
+          dusty: resp?.data?.dusty,
+          total: resp?.data?.clean + resp?.data?.dusty + resp?.data?.damaged,
+        });
+        setMissionVideoId(resp?.data?.mission_video_id);
+        setMissionVideoUrl(SET_IMAGE_URL(resp?.data?.video_url) || "");
+      } catch (err) {
+        console.error("Error fetching mission history:", err);
       }
-
-      // Add video file
-      if (videoFile) {
-        formData.set("video", videoFile);
-      }
-      console.log("asd", videoFile, missionId);
-      console.log("Form Data:", formData);
-      const resp = await dispatch(uploadMissionVideo(formData)).unwrap();
-      console.log("Upload Response:", resp);
-      setPanelCounts({
-        clean: resp?.data?.counts?.clean,
-        dusty: resp?.data?.counts?.dusty,
-        damage: resp?.data?.counts?.damaged,
-        total: resp?.data?.counts?.total,
-      });
-      setMissionVideoId(resp?.data?.id);
-    } catch (err) {
-      console.log("Error adding mission:", err);
-    }
-  };
-
-  const handleVideoSelect = (file) => {
-    setVideoFile(file);
-  };
-
-  const handleRemoveVideo = () => {
-    setVideoFile(null);
-  };
+    };
+    fetchHistoryById();
+  }, [missionId, dispatch]);
 
   return (
     <div className="flex justify-center items-center p-10 min-h-screen bg-[--color-avocado-100]">
@@ -85,16 +71,12 @@ export default function ActiveMissionPlan() {
             Upload Video
           </Button> */}
         </div>
-
         {/* Video Preview Card */}
         <VideoPreviewCard
-          videoFile={videoFile}
-          videoUrl={null}
-          onVideoSelect={handleVideoSelect}
-          onRemove={handleRemoveVideo}
-          className="max-w-2xl mx-auto"
+          videoUrl={missionVideoUrl}
+          onVideoSelect={() => {}} // No-op function
+          onRemove={() => {}} // No-op function
         />
-
         {/* Mission Summary Table */}
         <div className="p-8 mx-auto">
           <div className="border-2 border-black inline-block">
@@ -199,18 +181,6 @@ export default function ActiveMissionPlan() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="text-center">
-          <Button
-            type="button"
-            variant="hover-blue-full"
-            onClick={handleUpload}
-            isLoading={mission.isPostLoading}
-          >
-            Submit
-          </Button>
         </div>
       </div>
     </div>

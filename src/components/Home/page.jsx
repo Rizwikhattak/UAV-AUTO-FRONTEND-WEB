@@ -31,12 +31,14 @@ const HomePage = () => {
       {/* Top Bar */}
       <motion.div className="space-y-4 p-4" variants={itemVariants}>
         <motion.div
-          className="flex items-center justify-between gap-3"
+          className="flex items-center justify-center gap-3"
           variants={itemVariants}
         >
-          <AlignJustify className="w-6 h-6 text-white cursor-pointer" />
-          <h1 className="text-3xl font-semibold text-white">UAVAUTO</h1>
-          <Bell className="w-6 h-6 text-white cursor-pointer" />
+          {/* <AlignJustify className="w-6 h-6 text-white cursor-pointer" /> */}
+          <h1 className="text-3xl font-semibold text-white text-center">
+            UAVAUTO
+          </h1>
+          {/* <Bell className="w-6 h-6 text-white cursor-pointer" /> */}
         </motion.div>
 
         {/* Drone Image */}

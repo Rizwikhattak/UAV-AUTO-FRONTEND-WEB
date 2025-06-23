@@ -42,6 +42,20 @@ export const TOAST_MESSAGES = {
       ERROR: "Error deleting drone",
     },
   },
+  PLAN_MISSION: {
+    INSERT: {
+      SUCCESS: "Mission plan added successfully",
+      ERROR: "Error adding mission plan",
+    },
+    UPDATE: {
+      SUCCESS: "Mission plan updated successfully",
+      ERROR: "Error updating mission plan",
+    },
+    DELETE: {
+      SUCCESS: "Mission plan deleted successfully",
+      ERROR: "Error deleting mission plan",
+    },
+  },
 };
 
 export const ROUTES = {
@@ -52,7 +66,10 @@ export const ROUTES = {
   ADD_GEOFENCE: "/geofence/AddGeofence",
   VIEW_GEOFENCE: "/geofence/ViewGeofence",
   EDIT_GEOFENCE: "/geofence/EditGeofence",
+  ACTIVE_MISSION_PLAN: "/missionPlan/ActiveMission",
+  VIEW_MISSION_IMAGES: "/missionPlan/ViewMissionImages",
   ADD_MISSION_PLAN: "/missionPlan/AddMissionPlan",
+  EDIT_MISSION_PLAN: "/missionPlan/EditMissionPlan",
   VIEW_MISSION_PLAN: "/missionPlan/ViewMissionPlan",
   VIEW_HISTORY: "/history",
 };
@@ -76,4 +93,19 @@ export const GEOFENCE_APIS = {
   GET_ALL_GEOFENCES: "get_all_routes_with_location_pins",
   GET_GEOFENCE_BY_ID: "get_route_by_id",
   DELETE_GEOFENCE: "delete_route_by_id",
+};
+
+export const MISSION_APIS = {
+  INSERT_MISSION_PLAN: "insert_mission_plan",
+  UPLOAD_MISSION_VIDEO: "upload_mission_video",
+  UPDATE_MISSION_PLAN: "update_mission_plan_by_id",
+  GET_ALL_MISSION_PLANS: "get_all_mission_plans",
+  GET_MISSION_PLAN_BY_ID: "get_mission_plan",
+  DELETE_MISSION_PLAN: "delete_mission_plan_by_id",
+  GET_HISTORY: "get_all_history",
+  GET_HISTORY_BY_ID: "get_history_by_id",
+};
+
+export const MISSION_IMAGES_APIS = {
+  GET_MISSION_IMAGES: "get_mission_data_images",
 };

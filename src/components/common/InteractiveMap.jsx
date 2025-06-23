@@ -115,7 +115,7 @@ export default function InteractiveMap({
   return (
     <>
       {!displayOnly && (
-        <div className="mb-2 flex justify-between items-center">
+        <div className="mb-2 flex justify-between items-center gap-2 flex-col sm:flex-row">
           <Button variant="destructive" onClick={clearPins} size="sm">
             Clear All ({localPins.length})
           </Button>

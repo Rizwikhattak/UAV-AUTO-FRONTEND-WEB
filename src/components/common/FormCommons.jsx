@@ -58,6 +58,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 export const InputCommon = ({
   control,
   name,
@@ -146,183 +147,166 @@ export const InputCommon = ({
   );
 };
 export function DateTimePickerCommon({
+  form,
   control,
-  dateName = "start_date",
-  timeName = "start_time",
-  className,
+  name,
+  label,
+  style,
+  placeholder = "",
 }) {
-  // Hook up to both fields via useController
-  const {
-    field: dateField,
-    fieldState: { error: dateError },
-  } = useController({ name: dateName, control });
-  const {
-    field: timeField,
-    fieldState: { error: timeError },
-  } = useController({ name: timeName, control });
-
-  // Watch just the two fields from the form
-  const watchedDate = useWatch({ control, name: dateName });
-  const watchedTime = useWatch({ control, name: timeName });
-
-  // Parse initial field values if they exist
-  const initialDate = React.useMemo(() => {
-    if (!dateField.value) return null;
-    try {
-      return new Date(dateField.value);
-    } catch (err) {
-      return null;
-    }
-  }, [dateField.value]);
-
-  const initialTime = React.useMemo(() => {
-    if (!timeField.value) return { hour: "", minute: "" };
-    const [h, m] = timeField.value.split(":");
-    return { hour: h || "", minute: m || "" };
-  }, [timeField.value]);
-
-  // Local states for UI
-  const [date, setDate] = React.useState(initialDate);
-  const [time, setTime] = React.useState(initialTime);
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-
-  // Reset local states when form fields are cleared
-  React.useEffect(() => {
-    if (!watchedDate) {
-      setDate(null);
-    }
-  }, [watchedDate]);
-
-  React.useEffect(() => {
-    if (!watchedTime) {
-      setTime({ hour: "", minute: "" });
-    }
-  }, [watchedTime]);
-
-  // Format the combined user selection for the trigger button
-  const formattedDateTime = React.useMemo(() => {
-    if (!date) return "Pick date & time";
-    const dayString = format(date, "PPP");
-    const hour = time.hour || "00";
-    const minute = time.minute || "00";
-    const timeString = `${hour}:${minute}`;
-    return `${dayString} at ${timeString}`;
-  }, [date, time]);
-
-  // Handle time changes from the <Select> components
-  const handleTimeChange = (type, value) => {
-    setTime((prev) => ({
-      ...prev,
-      [type]: value,
-    }));
-  };
-  // "Confirm" button updates both fields in React Hook Form
-  const handleConfirm = () => {
+  function handleDateSelect(date) {
     if (date) {
-      dateField.onChange(format(date, "yyyy-MM-dd"));
+      form.setValue("time", date);
     }
-    if (time.hour !== "" && time.minute !== "") {
-      timeField.onChange(`${time.hour}:${time.minute}`);
+  }
+
+  function handleTimeChange(type, value) {
+    const currentDate = form.getValues("time") || new Date();
+    let newDate = new Date(currentDate);
+
+    if (type === "hour") {
+      const hour = parseInt(value, 10);
+      newDate.setHours(newDate.getHours() >= 12 ? hour + 12 : hour);
+    } else if (type === "minute") {
+      newDate.setMinutes(parseInt(value, 10));
+    } else if (type === "ampm") {
+      const hours = newDate.getHours();
+      if (value === "AM" && hours >= 12) {
+        newDate.setHours(hours - 12);
+      } else if (value === "PM" && hours < 12) {
+        newDate.setHours(hours + 12);
+      }
     }
-    setIsPopoverOpen(false);
-  };
+
+    form.setValue("time", newDate);
+  }
+
   return (
-    <div className={cn("w-full", className)}>
-      {/* Date Field Label */}
-      <div className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
-        <CalendarIcon className="w-4 h-4" />
-        <span>Start Date & Time</span>
-      </div>
-      {/* Popover for selecting date/time */}
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {formattedDateTime}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-full p-0 h-[15rem] overflow-y-auto"
-          align="start"
-        >
-          {/* Calendar for date */}
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            initialFocus
-          />
-
-          {/* Time selection */}
-          <div className="p-3 border-t border-border w-full">
-            <div className="flex items-center space-x-2">
-              <ClockIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Time</span>
-            </div>
-            <div className="flex items-center justify-between mt-2 w-full">
-              <Select
-                value={time.hour}
-                onValueChange={(val) => handleTimeChange("hour", val)}
-              >
-                <SelectTrigger className="w-[48%]">
-                  <SelectValue placeholder="Hour" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, i) => {
-                    const hr = String(i).padStart(2, "0");
-                    return (
-                      <SelectItem key={hr} value={hr}>
-                        {hr}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-              <span className="text-center text-muted-foreground">:</span>
-              <Select
-                value={time.minute}
-                onValueChange={(val) => handleTimeChange("minute", val)}
-              >
-                <SelectTrigger className="w-[48%]">
-                  <SelectValue placeholder="Min" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 60 }, (_, i) => {
-                    const min = String(i).padStart(2, "0");
-                    return (
-                      <SelectItem key={min} value={min}>
-                        {min}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              className="w-full mt-3"
-              variant="hover-blue-full"
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {/* Field errors */}
-      {dateError && (
-        <p className="text-sm text-red-500 mt-1">{dateError.message}</p>
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className="flex flex-col mt-2">
+          <FormLabel>{label}</FormLabel>
+          <Popover modal>
+            <PopoverTrigger className={cn(style, "")} asChild>
+              <FormControl>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full pl-3 text-left font-normal",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value ? (
+                    format(field.value, "MM/dd/yyyy hh:mm aa")
+                  ) : (
+                    <span>MM/DD/YYYY hh:mm aa</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <div className="sm:flex">
+                <Calendar
+                  mode="single"
+                  selected={field.value}
+                  onSelect={handleDateSelect}
+                  initialFocus
+                />
+                <div
+                  className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x"
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <ScrollArea className="w-64 sm:w-auto">
+                    <div className="flex sm:flex-col p-2">
+                      {Array.from({ length: 12 }, (_, i) => i + 1)
+                        .reverse()
+                        .map((hour) => (
+                          <Button
+                            key={hour}
+                            size="icon"
+                            type="button"
+                            variant={
+                              field.value &&
+                              field.value.getHours() % 12 === hour % 12
+                                ? "default"
+                                : "ghost"
+                            }
+                            className="sm:w-full shrink-0 aspect-square"
+                            onClick={() =>
+                              handleTimeChange("hour", hour.toString())
+                            }
+                          >
+                            {hour}
+                          </Button>
+                        ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" className="sm:hidden" />
+                  </ScrollArea>
+                  <ScrollArea className="w-64 sm:w-auto">
+                    <div className="flex sm:flex-col p-2">
+                      {Array.from({ length: 12 }, (_, i) => i * 5).map(
+                        (minute) => (
+                          <Button
+                            key={minute}
+                            size="icon"
+                            type="button"
+                            variant={
+                              field.value && field.value.getMinutes() === minute
+                                ? "default"
+                                : "ghost"
+                            }
+                            className="sm:w-full shrink-0 aspect-square"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTimeChange("minute", minute.toString());
+                            }}
+                          >
+                            {minute.toString().padStart(2, "0")}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <ScrollBar orientation="horizontal" className="sm:hidden" />
+                  </ScrollArea>
+                  <ScrollArea className="">
+                    <div className="flex sm:flex-col p-2">
+                      {["AM", "PM"].map((ampm) => (
+                        <Button
+                          key={ampm}
+                          size="icon"
+                          type="button"
+                          variant={
+                            field.value &&
+                            ((ampm === "AM" && field.value.getHours() < 12) ||
+                              (ampm === "PM" && field.value.getHours() >= 12))
+                              ? "default"
+                              : "ghost"
+                          }
+                          className="sm:w-full shrink-0 aspect-square"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTimeChange("ampm", ampm);
+                          }}
+                        >
+                          {ampm}
+                        </Button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* <FormDescription>
+            Please select your preferred date and time.
+          </FormDescription> */}
+          <FormMessage />
+        </FormItem>
       )}
-      {timeError && (
-        <p className="text-sm text-red-500 mt-1">{timeError.message}</p>
-      )}
-    </div>
+    />
   );
 }
 

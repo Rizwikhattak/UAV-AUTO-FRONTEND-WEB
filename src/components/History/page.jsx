@@ -1,18 +1,42 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { DataTableCommon } from "@/components/common/DataTableCommon";
 import { DataTableColumnHeaderCommon } from "@/components/common/DataTableColumnHeaderCommon";
 import DataTableFiltersCommon from "@/components/common/DataTableFiltersCommon";
 import { Input } from "@/components/ui/input";
+import { useDispatch, useSelector } from "react-redux";
+import { getMissionHistory } from "@/store/Actions/planMissionActions";
+import { Eye } from "lucide-react";
+import {
+  filterAscDesc,
+  filterMissions,
+} from "@/store/Reducers/planMissionSlice";
+import FilterCommon from "@/components/common/FilterCommon";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/utils/constants";
 
 const ViewHistory = () => {
   const filters = ["All", "Completed", "Aborted"];
   const [selectedFilter, setSelectedFilter] = useState(filters[0]);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const planMission = useSelector((state) => state.planMission);
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
+    dispatch(filterAscDesc({ filter: filter }));
   };
+  const handleInputFilterChange = (filterValue) => {
+    dispatch(filterMissions({ filter: filterValue }));
+  };
+  const handleViewHistory = (history) => {
+    router.push(`${ROUTES.VIEW_HISTORY}/${history.id}`);
+  };
+  useEffect(() => {
+    dispatch(getMissionHistory());
+  }, [dispatch]);
+
   const columns = [
     {
       accessorKey: "name",
@@ -32,20 +56,32 @@ const ViewHistory = () => {
         return <span>{status}</span>;
       },
     },
+    {
+      id: "actions",
+      header: () => <h1 className="font-bold text-lg text-center">Actions</h1>,
+      cell: ({ row }) => {
+        const history = row.original;
+
+        return (
+          <div className="flex items-center justify-center gap-4">
+            <button
+              className="text-blue-600 hover:text-blue-800 cursor-pointer"
+              onClick={() => handleViewHistory(history)}
+            >
+              <Eye size={20} />
+            </button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 100,
+    },
   ];
   return (
     <div className=" p-10">
       <div className="flex flex-col items-center gap-3 pb-5">
         <h1 className="text-lg sm:text-2xl font-semibold">History</h1>
-        <div className="flex items-center gap-1 bg-white rounded-full border px-3">
-          <span className="relative w-4 h-4">
-            <Image src="/Images/Search.png" fill className="object-cover" />
-          </span>
-          <Input
-            className="!w-60 !h-10 !px-2 rounded-lg border-none !bg-white"
-            placeholder="Search Missions"
-          />
-        </div>
+        <FilterCommon handleFilterChange={handleInputFilterChange} />
       </div>
       <div className="space-y-3">
         <div>
@@ -58,8 +94,8 @@ const ViewHistory = () => {
         <DataTableCommon
           // filters={filters}
           columns={columns}
-          data={missionHistory}
-          // isLoading={bankAccountsData.isLoading}
+          data={planMission.data}
+          isLoading={planMission.isLoading}
           // selectedFilter={selectedFilter}
           // setSelectedFilter={setSelectedFilter}
           // totalDataCount={bankAccountsData.count}
@@ -97,13 +133,5 @@ const ViewHistory = () => {
     </div>
   );
 };
-// HistoryScreenDummyData.js
-export const missionHistory = [
-  { id: "1", name: "Jinnah Solar Check", status: "Completed" },
-  { id: "3", name: "Voltage Output Check", status: "Completed" },
-  { id: "2", name: "Dust Accumulation Check", status: "Aborted" },
-  { id: "4", name: "Energy Generation Report", status: "Aborted" },
-  { id: "5", name: "Surveillance Drone Report", status: "Completed" },
-];
 
 export default ViewHistory;

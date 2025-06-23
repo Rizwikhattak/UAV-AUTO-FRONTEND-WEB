@@ -66,6 +66,7 @@ const droneSlice = createSlice({
         console.log("Action.payload", action.payload);
       })
       .addCase(getAllDrones.rejected, (state, action) => {
+        state.data = [];
         state.isLoading = false;
         state.error = action.payload;
       })

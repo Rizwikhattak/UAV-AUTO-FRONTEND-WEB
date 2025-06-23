@@ -40,7 +40,7 @@ const FullScreenMapModal = ({
       <ModalCommon
         open={isOpen}
         onOpenChange={onClose}
-        ModalStyle="sm:max-w-[40rem] max-h-[80vh] w-full h-full "
+        ModalStyle="sm:max-w-[40rem] max-h-[80vh] w-full h-full  "
         DialogHeaderComponent={
           <div className="flex items-center justify-between">
             <div>
@@ -53,18 +53,18 @@ const FullScreenMapModal = ({
                   : "Click on the map to add geofencing points. Click on existing pins to remove them."}
               </DialogDescription>
             </div>
-            <Button
+            {/* <Button
               onClick={handleSave}
               className="flex items-center gap-2 ml-4"
               variant="hover-blue-fit"
             >
               <Save size={16} />
               Save ({pins.length})
-            </Button>
+            </Button> */}
           </div>
         }
         DialogFotterComponent={
-          <DialogFooter className="p-4 border-t bg-white flex justify-between items-center">
+          <DialogFooter className=" pb-1 pt-6 sm:p-4 border-t bg-white flex justify-between items-center">
             <span className="text-sm text-gray-600">
               {pins.length} {mode === "station" ? "station" : "geofencing"}{" "}
               point
@@ -86,7 +86,7 @@ const FullScreenMapModal = ({
           </DialogFooter>
         }
       >
-        <div className="flex-1  h-[40vh] py-4">
+        <div className="flex-1 h-[25vh]  sm:h-[40vh] py-4">
           <InteractiveMap
             displayOnly={false}
             pins={pins}

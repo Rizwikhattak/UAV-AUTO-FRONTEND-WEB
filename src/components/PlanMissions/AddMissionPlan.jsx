@@ -9,36 +9,54 @@ import Spinner from "@/components/common/SpinnerCommon";
 import { getAllStations } from "@/store/Actions/stationActions";
 import { getAllDrones } from "@/store/Actions/droneActions";
 import { getAllOperators } from "@/store/Actions/operatorActions";
-import { addMissionPlan } from "@/store/Actions/planMissionActions";
 import {
+  getMissionPlanById,
+  insertMissionPlan,
+  updateMissionPlan,
+} from "@/store/Actions/planMissionActions";
+import {
+  ComboboxCommon,
   DateTimePickerCommon,
   InputCommon,
   SelectCommon,
 } from "@/components/common/FormCommons";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { getAllGeofences } from "@/store/Actions/geofenceActions";
+import { ROUTES } from "@/utils/constants";
 
 export default function AddMissionPlan() {
+  const params = useParams();
+  const missionPlanId = params.id;
+  console.log("Mission Plan ID:", missionPlanId);
   const dispatch = useDispatch();
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
   console.log("CAAAAALLLLLEEEEED");
-  // Example: Suppose you have slices for station, drone, operator
-  const station = useSelector((state) => state.station);
-  const droneState = useSelector((state) => state.drone);
+  // Example: Suppose you have slices for geofence, drone, operator
+  const geofence = useSelector((state) => state.geofence);
+  const drones = useSelector((state) => state.drone);
   const operatorState = useSelector((state) => state.operator);
   const mission = useSelector((state) => state.planMission);
   const router = useRouter();
+
   // Example initial form values
+  const now = new Date();
   let initialState = {
     name: "",
-    departure_station_id: "",
-    landing_station_id: "",
-    start_date: "",
-    start_time: "",
-    status: "not set",
+    geofence_id: "",
+    time: now, // Using single time field for the new DateTimePickerCommon
+    status: "active",
     drone_id: "",
-    operator_id: "",
   };
 
   // Setup React Hook Form with the mission schema
@@ -49,58 +67,181 @@ export default function AddMissionPlan() {
 
   // Fetch any data you need for dropdowns
   useEffect(() => {
-    dispatch(getAllStations());
+    dispatch(getAllGeofences());
     dispatch(getAllDrones());
-    dispatch(getAllOperators());
   }, [dispatch]);
+  useEffect(() => {
+    const fetchMissionPlanById = async () => {
+      if (missionPlanId) {
+        try {
+          const response = await dispatch(
+            getMissionPlanById(missionPlanId)
+          ).unwrap();
+          console.log("Fetched Mission Plan:", response);
 
-  // Submit handler
+          // Helper function to safely parse date
+          const parseDateTime = (dateStr, timeStr) => {
+            if (!dateStr || !timeStr) return new Date(); // fallback to current date
+
+            try {
+              // Convert DD-MM-YYYY to YYYY-MM-DD format
+              const dateParts = dateStr.split("-");
+              if (dateParts.length !== 3) {
+                console.warn("Invalid date format, expected DD-MM-YYYY");
+                return new Date();
+              }
+
+              const [day, month, year] = dateParts;
+              const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+                2,
+                "0"
+              )}`;
+
+              // Convert 12-hour time to 24-hour format
+              const convertTo24Hour = (time12h) => {
+                const [time, modifier] = time12h.split(" ");
+                let [hours, minutes, seconds] = time.split(":");
+
+                if (hours === "12") {
+                  hours = "00";
+                }
+
+                if (modifier === "PM") {
+                  hours = parseInt(hours, 10) + 12;
+                }
+
+                return `${hours.padStart(2, "0")}:${minutes}:${
+                  seconds || "00"
+                }`;
+              };
+
+              const time24h = convertTo24Hour(timeStr);
+              const isoString = `${isoDate}T${time24h}`;
+
+              console.log("Parsed ISO string:", isoString);
+              const parsedDate = new Date(isoString);
+
+              // Check if date is valid
+              if (isNaN(parsedDate.getTime())) {
+                console.warn(
+                  "Invalid date parsed, using current date as fallback"
+                );
+                return new Date();
+              }
+
+              return parsedDate;
+            } catch (error) {
+              console.error("Error parsing date:", error);
+              return new Date(); // fallback to current date
+            }
+          };
+
+          // Reset form with fetched data
+          form.reset({
+            name: response?.data?.name || "",
+            geofence_id: response?.data?.route_id || "",
+            time: parseDateTime(
+              response?.data?.start_date,
+              response?.data?.start_time
+            ),
+            drone_id: response?.data?.drone_id || "",
+          });
+        } catch (error) {
+          console.error("Error fetching mission plan:", error);
+        }
+      }
+    };
+    fetchMissionPlanById();
+  }, [dispatch, missionPlanId]);
+
+  // Submit handler for immediate mission
   const handleFormSubmit = async (data) => {
     try {
       console.log("Mission Form Submitted:", data);
-      // If your API expects FormData, create it:
-      // const formData = new FormData();
-      // Object.entries(data).forEach(([key, value]) => {
-      //   formData.append(key, value);
-      // });
-      // await dispatch(addMissionPlan(formData)).unwrap();
-
-      // Otherwise, if a simple JSON POST is fine:
       data.admin_id = 1;
-      await dispatch(addMissionPlan(JSON.stringify(data))).unwrap();
-      // Then reset to your initial form defaults
-      form.reset({
-        name: "",
-        departure_station_id: "",
-        landing_station_id: "",
-        start_date: "",
-        start_time: "",
-        status: "not set",
-        drone_id: "",
-        operator_id: "",
-      });
+      data.status = "active"; // Set status to active for immediate mission
+      // Convert time field to separate start_date and start_time for API
+      if (data.time) {
+        data.start_date = data.time.toISOString().slice(0, 10);
+        data.start_time = data.time.toTimeString().slice(0, 5);
+      }
 
-      // initialState = { ...initialState };
+      const resp = missionPlanId
+        ? await dispatch(
+            updateMissionPlan({
+              ...data,
+              id: missionPlanId,
+              route_id: data.geofence_id,
+            })
+          ).unwrap()
+        : await dispatch(
+            insertMissionPlan({ ...data, route_id: data.geofence_id })
+          ).unwrap();
+      router.push(`${ROUTES.ACTIVE_MISSION_PLAN}/${resp?.data?.id}`);
+      form.reset(initialState);
     } catch (err) {
       console.log("Error adding mission:", err);
+    }
+  };
+
+  // Submit handler for scheduled mission
+  const handleScheduledSubmit = async () => {
+    try {
+      // Get current form values
+      const formData = form.getValues();
+
+      // Validate the form
+      const isValid = await form.trigger();
+      if (!isValid) {
+        console.log("Form validation failed");
+        return;
+      }
+
+      console.log("Scheduled Mission Form Submitted:", formData);
+      formData.admin_id = 1;
+      formData.status = "pending"; // Change status to scheduled
+
+      // Convert time field to separate start_date and start_time for API
+      if (formData.time) {
+        formData.start_date = formData.time.toISOString().slice(0, 10);
+        formData.start_time = formData.time.toTimeString().slice(0, 5);
+      }
+
+      const resp = missionPlanId
+        ? await dispatch(
+            updateMissionPlan({
+              ...formData,
+              id: missionPlanId,
+              route_id: formData.geofence_id,
+            })
+          ).unwrap()
+        : await dispatch(
+            insertMissionPlan({ ...formData, route_id: formData.geofence_id })
+          ).unwrap();
+
+      router.push(ROUTES.HOME);
+      form.reset(initialState);
+      setIsScheduleModalOpen(false);
+    } catch (err) {
+      console.log("Error scheduling mission:", err);
     }
   };
 
   const handleError = (errors) => {
     console.log("Validation Errors:", errors);
   };
-  const stationData = [
-    {
-      name: "CUST SOLAR PANEL FARM",
-      value: "CUST SOLAR PANEL FARM",
-    },
-  ];
+
+  const handleScheduleClick = () => {
+    setIsScheduleModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col justify-center items-center p-10 h-screen bg-[--color-avocado-100]">
-      <div className="flex  flex-col sm:w-[70%] gap-4">
+      <div className="flex flex-col sm:w-[70%] gap-4">
         <div className="content-header text-center">
-          <h1 className="text-xl font-bold">Plan Mission</h1>
-          {/* <p>Plan and schedule your next mission efficiently.</p> */}
+          <h1 className="text-xl font-bold">
+            {missionPlanId ? "Update Mission" : "Plan Mission"}
+          </h1>
         </div>
 
         <Form {...form} className="w-full">
@@ -116,114 +257,81 @@ export default function AddMissionPlan() {
               placeholder="Enter mission name"
             />
 
-            {/* Departure Station */}
-            {/* {station.isLoading ? (
-              <Skeleton className="h-9 w-full" />
-            ) : ( */}
-            <SelectCommon
+            <ComboboxCommon
               control={form.control}
-              name="departure_station_id"
-              style="!rounded-full w-full"
-              label="Geofences"
-              items={stationData} // e.g., { id, name } objects
+              name="geofence_id"
+              label="Geofence"
+              items={geofence.data}
+              isLoading={geofence.isLoading}
               placeholder="Select Geofence"
             />
-            {/* )} */}
 
-            {/* Landing Station */}
-            {/* {station.isLoading ? (
-              <Skeleton className="h-9 w-full" />
-            ) : (
-              <SelectCommon
-                control={form.control}
-                name="landing_station_id"
-                label="Landing Station"
-                items={station.data} // same or different data as needed
-                placeholder="Select landing station"
-              />
-            )} */}
-
-            {/* <DateTimePickerCommon control={form.control} name="start_date" /> */}
-            {/* {droneState.isLoading ? (
-              <Skeleton className="h-9 w-full" />
-            ) : ( */}
-            <SelectCommon
+            <ComboboxCommon
               control={form.control}
               name="drone_id"
-              style="!rounded-full w-full"
               label="Drones"
-              items={drones} // e.g., { id, name } objects
+              items={drones.data}
+              isLoading={drones.isLoading}
               placeholder="Select drone"
             />
-            {/* )} */}
 
-            {/* Operator */}
-            {/* {operatorState.isLoading ? (
-              <Skeleton className="h-9 w-full" />
-            ) : (
-              <SelectCommon
-                control={form.control}
-                name="operator_id"
-                label="Operator"
-                items={operatorState.data} // e.g., { id, name } objects
-                placeholder="Assign to operator"
-              />
-            )} */}
+            <Button
+              type="submit"
+              variant="hover-blue-full"
+              isLoading={mission.isPostLoading}
+            >
+              Commence Now
+            </Button>
 
             <Button
               type="button"
-              onClick={() => router.push("/missionPlan/ActiveMission")}
-              variant={mission.isLoading ? "outline-full" : "hover-blue-full"}
-              disabled={mission.isLoading}
+              variant="hover-blue-full"
+              onClick={handleScheduleClick}
             >
-              {mission.isLoading ? <Spinner /> : "Commence Now"}
-            </Button>
-            <Button
-              type="submit"
-              variant={mission.isLoading ? "outline-full" : "hover-blue-full"}
-              disabled={mission.isLoading}
-            >
-              {mission.isLoading ? <Spinner /> : "Schedule for later"}
+              Schedule for later
             </Button>
           </form>
         </Form>
+
+        {/* Schedule Modal */}
+        <Dialog
+          open={isScheduleModalOpen}
+          onOpenChange={setIsScheduleModalOpen}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Schedule Mission</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              {/* Wrap the DateTimePickerCommon with Form context */}
+              <Form {...form}>
+                <DateTimePickerCommon
+                  form={form}
+                  control={form.control}
+                  name="time"
+                  label="Schedule Date & Time"
+                  placeholder="Select date and time"
+                />
+              </Form>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsScheduleModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="hover-blue-full"
+                onClick={handleScheduledSubmit}
+                isLoading={mission.isPostLoading}
+              >
+                OK
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 }
-const drones = [
-  {
-    image: "/Images/dashboard_drone.png",
-    name: "Phantom X7",
-    value: "Phantom X7",
-    speed: "90km/h",
-    flightDuration: "1.5h",
-    ceiling: "100m",
-  },
-  {
-    image: "/Images/Drone_1.png",
-
-    name: "Falcon Pro",
-    value: "Falcon Pro",
-    speed: "85km/h",
-    flightDuration: "2h",
-    ceiling: "300m",
-  },
-  {
-    image: "/Images/Drone_2.png",
-    name: "Eagle Eye",
-    value: "Eagle Eye",
-    speed: "70km/h",
-    flightDuration: "1h",
-    ceiling: "200m",
-  },
-  {
-    image: "/Images/Drone_3.png",
-
-    name: "Swift Hawk",
-    value: "Swift Hawk",
-    speed: "65km/h",
-    flightDuration: "2h",
-    ceiling: "350m",
-  },
-];

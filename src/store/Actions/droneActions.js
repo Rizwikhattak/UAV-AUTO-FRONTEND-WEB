@@ -14,7 +14,7 @@ export const insertDrone = createAsyncThunk(
       );
       return droneData;
     } catch (error) {
-      rejectWithValue(error.response?.data || "Error adding drone");
+      return rejectWithValue(error.response?.data || "Error adding drone");
     }
   }
 );
@@ -31,7 +31,7 @@ export const getAllDrones = createAsyncThunk(
       );
       return droneData;
     } catch (error) {
-      rejectWithValue(error.message || "Error Retrieving drones");
+      return rejectWithValue(error.message || "Error Retrieving drones");
     }
   }
 );
@@ -47,7 +47,7 @@ export const getDroneById = createAsyncThunk(
       );
       return droneData;
     } catch (error) {
-      rejectWithValue(error.message || "Error Retrieving drones");
+      return rejectWithValue(error.message || "Error Retrieving drones");
     }
   }
 );
@@ -63,7 +63,7 @@ export const updateDrone = createAsyncThunk(
       );
       return droneData;
     } catch (error) {
-      rejectWithValue(error?.message || "Error updating drone");
+      return rejectWithValue(error?.message || "Error updating drone");
     }
   }
 );
@@ -79,7 +79,7 @@ export const deleteDrone = createAsyncThunk(
       );
       return droneData;
     } catch (error) {
-      rejectWithValue(error?.message || "Error deleting drone");
+      return rejectWithValue(error?.message || "Error deleting drone");
     }
   }
 );
