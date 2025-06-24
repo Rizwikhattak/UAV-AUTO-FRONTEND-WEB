@@ -129,11 +129,11 @@ export default function ActiveMissionPlan() {
                     Dusty
                   </td>
                   <td className="border border-black px-4 py-3 w-24">
-                    {panelCounts?.clean !== null ? panelCounts?.dusty : "N/A"}
+                    {panelCounts?.dusty !== null ? panelCounts?.dusty : "N/A"}
                   </td>
                   <td
                     className={`border ${
-                      panelCounts?.clean !== null
+                      panelCounts?.dusty !== null
                         ? "cursor-pointer underline text-blue-500"
                         : ""
                     } border-black px-4 py-3 w-24`}
@@ -157,14 +157,14 @@ export default function ActiveMissionPlan() {
                   </td>
                   <td
                     className={`border ${
-                      panelCounts?.clean !== null
+                      panelCounts?.damage !== null
                         ? "cursor-pointer underline text-blue-500"
                         : ""
                     } border-black px-4 py-3 w-24`}
                     onClick={() => {
                       if (panelCounts?.damage !== null) {
                         router.push(
-                          `${ROUTES.VIEW_MISSION_IMAGES}/${missionVideoId}?label=damage_solar_panel`
+                          `${ROUTES.VIEW_MISSION_IMAGES}/${missionVideoId}?label=damaged_solar_panel`
                         );
                       }
                     }}
