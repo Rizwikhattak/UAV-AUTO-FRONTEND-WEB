@@ -10,6 +10,12 @@ export const API_TYPE = {
   JSON: "json",
 };
 
+export const CONSTANTS = {
+  CLEAN_SOLAR_PANEL: "clean_solar_panel",
+  DAMAGED_SOLAR_PANEL: "damaged_solar_panel",
+  DUSTY_SOLAR_PANEL: "dusty_solar_panel",
+};
+
 export const TOAST_MESSAGES = {
   LOGIN: {
     ERROR: "Error logging in User",
@@ -72,6 +78,7 @@ export const ROUTES = {
   EDIT_MISSION_PLAN: "/missionPlan/EditMissionPlan",
   VIEW_MISSION_PLAN: "/missionPlan/ViewMissionPlan",
   VIEW_HISTORY: "/history",
+  EFFICIENCY: "/efficiency",
 };
 
 export const AUTH_APIS = {
@@ -108,4 +115,9 @@ export const MISSION_APIS = {
 
 export const MISSION_IMAGES_APIS = {
   GET_MISSION_IMAGES: "get_mission_data_images",
+};
+export const PANEL_EFFICIENCY_APIS = {
+  INSERT: "insert_solar_panel_efficiency",
+  GET_ALL: "get_all_solar_panel_efficiency",
+  UPDATE: "update_solar_panel_efficiency_by_id",
 };

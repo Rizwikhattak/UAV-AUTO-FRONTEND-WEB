@@ -124,6 +124,11 @@ const items = [
     imageSrc: "/Images/History.png",
     href: ROUTES.VIEW_HISTORY,
   },
+  {
+    label: "Efficiency",
+    imageSrc: "/Images/Efficiency.png",
+    href: ROUTES.EFFICIENCY,
+  },
 ];
 
 export default HomePage;
