@@ -1,6 +1,15 @@
-import { Skeleton } from "@/Component/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Card Skeleton with Stats
+export function RowSkeleton(count = 2) {
+  return (
+    <div className="space-y-4 w-full  px-4 flex flex-col">
+      {Array.from({ length: count }).map((_, index) => {
+        return <Skeleton className="h-12 w-full bg-gray-200" />;
+      })}
+    </div>
+  );
+}
 export function CardSkeleton() {
   return (
     <div className="rounded-xl border bg-card p-4 shadow-sm">

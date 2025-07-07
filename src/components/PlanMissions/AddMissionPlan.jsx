@@ -177,7 +177,7 @@ export default function AddMissionPlan() {
         : await dispatch(
             insertMissionPlan({ ...data, route_id: data.geofence_id })
           ).unwrap();
-      router.push(`${ROUTES.ACTIVE_MISSION_PLAN}/${resp?.data?.id}`);
+      router.push(`${ROUTES.MISSION_PANEL_MAP}/${resp?.data?.id}`);
       form.reset(initialState);
     } catch (err) {
       console.log("Error adding mission:", err);

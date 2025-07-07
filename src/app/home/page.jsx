@@ -1,10 +1,13 @@
 import HomePage from "@/components/Home/page";
+import ProtectedLayout from "@/components/ProtectedLayout/ProtectedLayout";
 import React from "react";
 
 const home = () => {
   return (
     <>
-      <HomePage />
+      {/* <ProtectedLayout> */}
+        <HomePage />
+      {/* </ProtectedLayout> */}
     </>
   );
 };

@@ -202,7 +202,7 @@ export default function ActiveMissionPlan() {
         </div>
 
         {/* Submit Button */}
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <Button
             type="button"
             variant="hover-blue-full"
@@ -210,6 +210,15 @@ export default function ActiveMissionPlan() {
             isLoading={mission.isPostLoading}
           >
             Submit
+          </Button>
+          <Button
+            type="button"
+            variant="hover-blue-full"
+            onClick={() =>
+              router.push(`${ROUTES.EFFICIENCY_REPORT}/${missionId}`)
+            }
+          >
+            View Efficienct Report
           </Button>
         </div>
       </div>

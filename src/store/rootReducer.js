@@ -7,6 +7,8 @@ import operatorReducer from "@/store/Reducers/operatorSlice";
 import geofenceReducer from "@/store/Reducers/geofenceSlice";
 import missionImagesReducer from "@/store/Reducers/missionImagesSlice";
 import panelEfficiencyReducer from "@/store/Reducers/panelEfficiencySlice";
+import missionPanelMapReducer from "@/store/Reducers/missionPanelMapSlice";
+import efficiencyReportReducer from "@/store/Reducers/efficiencyReportSlice";
 const rootReducer = combineReducers({
   auth: authReducer,
   drone: droneReducer,
@@ -16,5 +18,7 @@ const rootReducer = combineReducers({
   geofence: geofenceReducer,
   missionImages: missionImagesReducer,
   panelEfficiency: panelEfficiencyReducer,
+  missionPanelMap: missionPanelMapReducer,
+  efficiencyReport: efficiencyReportReducer,
 });
 export default rootReducer;

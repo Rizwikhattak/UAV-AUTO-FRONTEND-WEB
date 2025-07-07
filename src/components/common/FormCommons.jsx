@@ -96,7 +96,9 @@ export const InputCommon = ({
                   : `space-y-[4px] ${!showErrorMessage ? "" : "mt-2"}`
               }`}
             >
-              <FormLabel htmlFor={name}>{label}</FormLabel>
+              <FormLabel htmlFor={name} className="font-semibold text-base">
+                {label}
+              </FormLabel>
               <FormControl>
                 {inputType === "password" ? (
                   <InputPassword

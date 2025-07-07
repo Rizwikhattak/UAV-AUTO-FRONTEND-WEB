@@ -4,10 +4,12 @@ import InputCommon from "@/components/common/InputCommon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { loginUser } from "@/store/Actions/authActions";
+import { CONSTANTS, ROUTES } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -16,6 +18,7 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const form = useForm({
     defaultValues: {
@@ -27,8 +30,10 @@ export default function LoginPage() {
   const handleFormSubmit = async (data) => {
     try {
       console.log("Login attempt with:", data);
-      await dispatch(loginUser(data)).unwrap();
-      router.push("/home");
+      const resp = await dispatch(loginUser(data)).unwrap();
+      if (resp.data.role === CONSTANTS.MAINTENANCE_ROLE)
+        return router.push(ROUTES.MAINTENANCE_MISSIONS);
+      else return router.push(ROUTES.HOME);
     } catch (err) {
       console.error(err);
     }
@@ -39,6 +44,21 @@ export default function LoginPage() {
     console.error(err);
   };
 
+  // useEffect(() => {
+  //   if (auth.isAuthorized) {
+  //     if (auth.data.role === CONSTANTS.MAINTENANCE_ROLE)
+  //       return router.push(ROUTES.MAINTENANCE_MISSIONS);
+  //     else return router.push(ROUTES.HOME);
+  //   } else setIsLoading(false);
+  // }, []);
+  // if (isLoading)
+  //   return (
+  //     <div className="h-screen flex items-center justify-center">
+  //       <div className="relative h-[80vh] w-[40vw]">
+  //         <Image src="/Images/loading_image.png" fill />
+  //       </div>
+  //     </div>
+  //   );
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6">
       <div className="w-full max-w-md space-y-8">

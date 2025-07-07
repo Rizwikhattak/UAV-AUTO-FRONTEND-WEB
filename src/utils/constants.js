@@ -14,6 +14,8 @@ export const CONSTANTS = {
   CLEAN_SOLAR_PANEL: "clean_solar_panel",
   DAMAGED_SOLAR_PANEL: "damaged_solar_panel",
   DUSTY_SOLAR_PANEL: "dusty_solar_panel",
+  OPERATOR_ROLE: "operator",
+  MAINTENANCE_ROLE: "maintenance",
 };
 
 export const TOAST_MESSAGES = {
@@ -66,6 +68,7 @@ export const TOAST_MESSAGES = {
 
 export const ROUTES = {
   HOME: "/home",
+  LOGIN: "/",
   ADD_DRONE: "/drone/AddDrone",
   VIEW_DRONE: "/drone/ViewDrone",
   EDIT_DRONE: "/drone/EditDrone",
@@ -73,12 +76,15 @@ export const ROUTES = {
   VIEW_GEOFENCE: "/geofence/ViewGeofence",
   EDIT_GEOFENCE: "/geofence/EditGeofence",
   ACTIVE_MISSION_PLAN: "/missionPlan/ActiveMission",
+  EFFICIENCY_REPORT: "/efficiency-report",
+  MISSION_PANEL_MAP: "/mission-panel-map",
   VIEW_MISSION_IMAGES: "/missionPlan/ViewMissionImages",
   ADD_MISSION_PLAN: "/missionPlan/AddMissionPlan",
   EDIT_MISSION_PLAN: "/missionPlan/EditMissionPlan",
   VIEW_MISSION_PLAN: "/missionPlan/ViewMissionPlan",
   VIEW_HISTORY: "/history",
   EFFICIENCY: "/efficiency",
+  MAINTENANCE_MISSIONS: "/maintenance-missions",
 };
 
 export const AUTH_APIS = {
@@ -120,4 +126,14 @@ export const PANEL_EFFICIENCY_APIS = {
   INSERT: "insert_solar_panel_efficiency",
   GET_ALL: "get_all_solar_panel_efficiency",
   UPDATE: "update_solar_panel_efficiency_by_id",
+};
+
+export const MISSION_PANEL_MAP_APIS = {
+  INSERT: "insert_mission_panel_map",
+  GET: "get_mission_panel_maps_by_mission_id",
+  DELETE: "delete_mission_panel_map_by_id",
+};
+
+export const EFFICIENCY_REPORT_APIS = {
+  GET: "get_efficiency_reports_by_mission_id",
 };

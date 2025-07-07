@@ -4,15 +4,23 @@ import { createSlice } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 
 const initialState = {
-  data: [],
+  data: {},
   isLoading: false,
-  error: false,
+  error: null,
+  isAuthorized: false,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state, action) => {
+      state.data = {};
+      state.isLoading = false;
+      state.error = null;
+      state.isAuthorized = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state, action) => {
@@ -20,8 +28,11 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        state.data = action.payload.data;
+        state.isAuthorized = true;
         state.isLoading = false;
         state.error = null;
+
         // toast.success("Drone Added");
       })
       .addCase(loginUser.rejected, (state, action) => {
