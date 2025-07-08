@@ -7,9 +7,9 @@ export const getMissionImages = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const missionImagesData = await API_COMMON(
-        API_ACTIONS.POST,
+        API_ACTIONS.GET,
         API_TYPE.JSON,
-        `${MISSION_IMAGES_APIS.GET_MISSION_IMAGES}/${data.missionVideoId}`,
+        `${MISSION_IMAGES_APIS.GET_MISSION_IMAGES}/${data.missionVideoId}/${data.label}`,
         data
       );
       return missionImagesData;

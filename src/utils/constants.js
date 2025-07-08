@@ -137,3 +137,7 @@ export const MISSION_PANEL_MAP_APIS = {
 export const EFFICIENCY_REPORT_APIS = {
   GET: "get_efficiency_reports_by_mission_id",
 };
+export const MAINTENANCE_SCHEDULE_APIS = {
+  GET: "get_scheduled_missions",
+  GET_MISSION_DATA_FORSCHEDULED: "get_mission_data_for_scheduled_by_id",
+};

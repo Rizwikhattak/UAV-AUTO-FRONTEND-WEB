@@ -148,6 +148,60 @@ export const InputCommon = ({
     </>
   );
 };
+
+// export const DatePickerCommon = ({
+//   control,
+//   name,
+//   label,
+//   placeholder = "Pick a date",
+//   className = "",
+//   disabled = false,
+// }) => {
+//   return (
+//     <FormField
+//       control={control}
+//       name={name}
+//       render={({ field, fieldState }) => (
+//         <FormItem className="flex flex-col">
+//           {label && (
+//             <FormLabel htmlFor={name} className="font-semibold text-base mb-1">
+//               {label}
+//             </FormLabel>
+//           )}
+//           <Popover>
+//             <PopoverTrigger asChild>
+//               <FormControl>
+//                 <button
+//                   type="button"
+//                   disabled={disabled}
+//                   className={cn(
+//                     "w-full h-10 px-4 py-2 border border-input rounded-md shadow-sm text-left text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+//                     !field.value && "text-muted-foreground",
+//                     className
+//                   )}
+//                 >
+//                   {field.value ? format(field.value, "PPP") : <span>{placeholder}</span>}
+//                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+//                 </button>
+//               </FormControl>
+//             </PopoverTrigger>
+//             <PopoverContent className="w-auto p-0" align="start">
+//               <Calendar
+//                 mode="single"
+//                 selected={field.value}
+//                 onSelect={field.onChange}
+//                 disabled={disabled}
+//                 initialFocus
+//               />
+//             </PopoverContent>
+//           </Popover>
+//           <FormMessage className="mt-1" />
+//         </FormItem>
+//       )}
+//     />
+//   );
+// };
+
 export function DateTimePickerCommon({
   form,
   control,
@@ -1159,6 +1213,7 @@ export const DatePickerCommon = ({
   name,
   label = "Date",
   Icon = <CircleAlert color="red" size="20" />,
+  minDate,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -1173,7 +1228,7 @@ export const DatePickerCommon = ({
               formType === "card" ? "flex items-center gap-2" : ""
             }`}
           >
-            <FormLabel>{label}</FormLabel>
+            <FormLabel className="pb-2">{label}</FormLabel>
             <FormControl>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
@@ -1198,6 +1253,11 @@ export const DatePickerCommon = ({
                       field.onChange(selectedDate);
                       setOpen(false); // Close popover after selection
                     }}
+                    disabled={(date) =>
+                      minDate
+                        ? date < new Date(minDate).setHours(0, 0, 0, 0)
+                        : false
+                    }
                     initialFocus
                   />
                 </PopoverContent>

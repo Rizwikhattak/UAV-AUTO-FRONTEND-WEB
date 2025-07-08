@@ -1,10 +1,10 @@
-import MaintenanceMissions from "@/components/MaintenanceMissions/page";
+import PlanMaintenance from "@/components/PlanMaintenance/page";
 import React from "react";
 
 const page = () => {
   return (
     <>
-      <MaintenanceMissions />
+      <PlanMaintenance />
     </>
   );
 };
