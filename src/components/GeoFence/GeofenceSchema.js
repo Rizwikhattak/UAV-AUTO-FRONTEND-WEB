@@ -7,8 +7,8 @@ export const geofenceSchema = z.object({
     .string()
     .min(2, { message: "Geofence name must be at least 2 characters long." })
     .max(50, { message: "Geofence name must not exceed 50 characters." }),
-  rows: z.coerce.number().min(1, { message: "Enter valid no. of rows" }),
-  columns: z.coerce.number().min(1, { message: "Enter valid no. of columns" }),
+  // rows: z.coerce.number().min(1, { message: "Enter valid no. of rows" }),
+  // columns: z.coerce.number().min(1, { message: "Enter valid no. of columns" }),
 
   stationPins: z
     .array(
@@ -30,4 +30,9 @@ export const geofenceSchema = z.object({
       })
     )
     .min(1, { message: "At least one geofencing point must be added." }),
+});
+
+export const fenceSchema = z.object({
+  rows: z.coerce.number().min(1, { message: "Enter valid no. of rows" }),
+  columns: z.coerce.number().min(1, { message: "Enter valid no. of columns" }),
 });

@@ -63,6 +63,14 @@ export const TOAST_MESSAGES = {
       SUCCESS: "Mission plan deleted successfully",
       ERROR: "Error deleting mission plan",
     },
+    ABORT: {
+      SUCCESS: "Mission plan Aborted",
+      ERROR: "Error Aborting mission plan",
+    },
+    INITIATE_DRONES: {
+      SUCCESS: "Drones are intiated",
+      ERROR: "Error initiating drones",
+    },
   },
 };
 
@@ -76,6 +84,7 @@ export const ROUTES = {
   VIEW_GEOFENCE: "/geofence/ViewGeofence",
   EDIT_GEOFENCE: "/geofence/EditGeofence",
   ACTIVE_MISSION_PLAN: "/missionPlan/ActiveMission",
+  INITIATE_DRONE: "/missionPlan/InitiateDrone",
   EFFICIENCY_REPORT: "/efficiency-report",
   MISSION_PANEL_MAP: "/mission-panel-map",
   VIEW_MISSION_IMAGES: "/missionPlan/ViewMissionImages",
@@ -113,10 +122,14 @@ export const MISSION_APIS = {
   UPLOAD_MISSION_VIDEO: "upload_mission_video",
   UPDATE_MISSION_PLAN: "update_mission_plan_by_id",
   GET_ALL_MISSION_PLANS: "get_all_mission_plans",
+  ABORT_MISSION: "abort_mission",
   GET_MISSION_PLAN_BY_ID: "get_mission_plan",
   DELETE_MISSION_PLAN: "delete_mission_plan_by_id",
   GET_HISTORY: "get_all_history",
   GET_HISTORY_BY_ID: "get_history_by_id",
+  GET_ALL_VIDEOS_FROM_FOLDER: "get_all_mp4_files_from_folder",
+  SERVE_MISSION_VIDEOS: "stream_task_video",
+  INITIATE_DRONE: "initialize_drones",
 };
 
 export const MISSION_IMAGES_APIS = {

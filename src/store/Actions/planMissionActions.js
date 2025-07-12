@@ -53,6 +53,23 @@ export const getAllMissionPlans = createAsyncThunk(
     }
   }
 );
+export const handleMissionAbort = createAsyncThunk(
+  "planMission/handleMissionAbort",
+  async (id, { rejectWithValue }) => {
+    try {
+      const planMissionData = await API_COMMON(
+        API_ACTIONS.PUT,
+        API_TYPE.JSON,
+        `${MISSION_APIS.ABORT_MISSION}/${id}`,
+        null
+      );
+      return planMissionData;
+    } catch (err) {
+      console.log("Rejected statr 1");
+      return rejectWithValue(err?.message || "Error adding mission plan");
+    }
+  }
+);
 export const getMissionPlanById = createAsyncThunk(
   "planMission/getMissionPlanById",
   async (id, { rejectWithValue }) => {
@@ -130,6 +147,57 @@ export const getMissionHistoryById = createAsyncThunk(
         API_TYPE.JSON,
         `${MISSION_APIS.GET_HISTORY_BY_ID}/${id}`,
         null
+      );
+      return planMissionData;
+    } catch (err) {
+      console.log("Rejected statr 1");
+      return rejectWithValue(err?.message || "Error adding mission plan");
+    }
+  }
+);
+export const getAllVideosFromFolder = createAsyncThunk(
+  "planMission/getAllVideosFromFolder",
+  async (_, { rejectWithValue }) => {
+    try {
+      const planMissionData = await API_COMMON(
+        API_ACTIONS.GET,
+        API_TYPE.JSON,
+        `${MISSION_APIS.GET_ALL_VIDEOS_FROM_FOLDER}`,
+        null
+      );
+      return planMissionData;
+    } catch (err) {
+      console.log("Rejected statr 1");
+      return rejectWithValue(err?.message || "Error adding mission plan");
+    }
+  }
+);
+export const serveMissionVideos = createAsyncThunk(
+  "planMission/serveMissionVideos",
+  async (fileName, { rejectWithValue }) => {
+    try {
+      const planMissionData = await API_COMMON(
+        API_ACTIONS.GET,
+        API_TYPE.JSON,
+        `${MISSION_APIS.SERVE_MISSION_VIDEOS}/${fileName}`,
+        null
+      );
+      return planMissionData;
+    } catch (err) {
+      console.log("Rejected statr 1");
+      return rejectWithValue(err?.message || "Error adding mission plan");
+    }
+  }
+);
+export const initializeDrones = createAsyncThunk(
+  "planMission/initializeDrones",
+  async (data, { rejectWithValue }) => {
+    try {
+      const planMissionData = await API_COMMON(
+        API_ACTIONS.POST,
+        API_TYPE.JSON,
+        `${MISSION_APIS.INITIATE_DRONE}`,
+        data
       );
       return planMissionData;
     } catch (err) {

@@ -8,12 +8,12 @@ import {
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
 import { useLocation, Link } from "react-router-dom";
-import { getBreadcrumbs } from "../../Utils/Helpers";
+import { getBreadcrumbs } from "../../utils/Helpers";
 
 const HeaderCommon = () => {
   const { pathname } = useLocation();
   const breadcrumbs = getBreadcrumbs(pathname);
-  
+
   return (
     <Breadcrumb>
       <BreadcrumbList>

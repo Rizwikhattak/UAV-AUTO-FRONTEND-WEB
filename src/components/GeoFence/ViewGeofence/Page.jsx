@@ -85,12 +85,12 @@ const ViewGeofence = () => {
         return (
           <div className="flex items-center justify-center gap-4">
             {/* Edit button */}
-            <button
+            {/* <button
               className="text-blue-600 hover:text-blue-800 cursor-pointer"
               onClick={() => handleGeofenceEdit(geofence)}
             >
               <Pencil size={20} />
-            </button>
+            </button> */}
 
             {/* Delete button with conditional tooltip */}
             <TooltipProvider delayDuration={100}>

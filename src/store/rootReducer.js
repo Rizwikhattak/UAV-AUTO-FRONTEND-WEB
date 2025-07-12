@@ -10,6 +10,7 @@ import panelEfficiencyReducer from "@/store/Reducers/panelEfficiencySlice";
 import missionPanelMapReducer from "@/store/Reducers/missionPanelMapSlice";
 import efficiencyReportReducer from "@/store/Reducers/efficiencyReportSlice";
 import maintenanceScheduleReducer from "@/store/Reducers/maintenanceScheduleSlice";
+import missionVideoReducer from "@/store/Reducers/missionVideoSlice";
 const rootReducer = combineReducers({
   auth: authReducer,
   drone: droneReducer,
@@ -22,5 +23,6 @@ const rootReducer = combineReducers({
   missionPanelMap: missionPanelMapReducer,
   efficiencyReport: efficiencyReportReducer,
   maintenanceSchedule: maintenanceScheduleReducer,
+  missionVideo: missionVideoReducer,
 });
 export default rootReducer;

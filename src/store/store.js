@@ -12,11 +12,34 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+// export const store = configureStore({
+//   reducer: persistedReducer,
+//   middleware: (getDefaultMiddleware) =>
+//     getDefaultMiddleware({
+//       serializableCheck: false, // required for redux-persist
+//     }),
+// });
+
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // required for redux-persist
+      serializableCheck: {
+        // Ignore these action types for File objects
+        ignoredActions: [
+          "missionVideo/updateCurrentVideo",
+          "missionVideo/setVideos",
+          "missionVideo/addVideo",
+          "missionVideo/updateVideoByIndex",
+        ],
+        // Ignore these field paths in all actions
+        ignoredActionsPaths: ["payload.file"],
+        // Ignore these paths in the state
+        ignoredPaths: [
+          "missionVideo.videos.0.file",
+          "missionVideo.videos.1.file",
+        ],
+      },
     }),
 });
 

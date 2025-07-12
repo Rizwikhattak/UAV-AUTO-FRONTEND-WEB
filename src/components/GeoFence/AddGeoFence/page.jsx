@@ -19,6 +19,9 @@ import {
 } from "@/store/Actions/geofenceActions";
 import { useParams, useRouter } from "next/navigation";
 import { ROUTES } from "@/utils/constants";
+import FullScreenMapRouteModal from "@/components/common/FullScreenMaopRouteModal";
+import { DataTableCommon } from "@/components/common/DataTableCommon";
+import { Trash2 } from "lucide-react";
 
 const AddGeofence = () => {
   const params = useParams();
@@ -37,6 +40,7 @@ const AddGeofence = () => {
   const [stationPins, setStationPins] = useState([]);
   const [routePins, setRoutePins] = useState([]);
   const [deletedPins, setDeletedPins] = useState([]);
+  const [routeData, setRouteData] = useState([]);
   // Combine all pins for display
   const allPins = [
     ...stationPins.map((pin) => ({ ...pin, type: "station" })),
@@ -71,25 +75,35 @@ const AddGeofence = () => {
       console.log("Form Submitted:", data);
       const payload = {
         name: data.name,
-        rows: data.rows,
-        columns: data.columns,
+        // rows: data.rows,
+        // columns: data.columns,
         station_latitude: stationPins[0]?.lat || 0,
         station_longitude: stationPins[0]?.lng || 0,
-        deleted_pins: deletedPins.map((pin) => pin.location_pin_id),
-        locations: data.routePins.map((pin) => {
-          if (pin.location_pin_id) {
-            return {
-              location_pin_id: pin.location_pin_id,
-              latitude: pin.lat,
-              longitude: pin.lng,
-            };
-          }
+        // deleted_pins: deletedPins.map((pin) => pin.location_pin_id),
+        // locations: data.routePins.map((pin) => {
+        //   if (pin.location_pin_id) {
+        //     return {
+        //       location_pin_id: pin.location_pin_id,
+        //       latitude: pin.lat,
+        //       longitude: pin.lng,
+        //     };
+        //   }
+        //   return {
+        //     latitude: pin.lat,
+        //     longitude: pin.lng,
+        //   };
+        // }),
+        locations: routeData?.map((route) => {
           return {
-            latitude: pin.lat,
-            longitude: pin.lng,
+            ...route,
+            pins: route?.pins?.map((item) => ({
+              latitude: item?.lat,
+              longitude: item?.lng,
+            })),
           };
         }),
       };
+      console.log("This is payload", payload);
       geofenceId
         ? await dispatch(
             updateGeofence({ ...payload, id: geofenceId })
@@ -113,8 +127,17 @@ const AddGeofence = () => {
     setShowStationModal(false);
   };
 
-  const handleRoutePins = (pins) => {
+  const handleRouteData = (pins, rows, cols) => {
     setRoutePins(pins);
+    setRouteData((prev) => [
+      ...prev,
+      {
+        fence_number: prev.length + 1,
+        rows: rows,
+        columns: cols,
+        pins: pins,
+      },
+    ]);
     form.setValue("routePins", pins);
     clearErrors("routePins");
     setShowRouteModal(false);
@@ -123,6 +146,51 @@ const AddGeofence = () => {
     setDeletedPins((oldPins) => (pins ? [...oldPins, pins] : oldPins));
   };
   console.log("Deleted Pins:", deletedPins);
+
+  const columns = [
+    {
+      accessorKey: "fence_number",
+      header: ({ column }) => <h1 className="">Fence No.</h1>,
+      enableSorting: false,
+    },
+    {
+      accessorKey: "rows",
+      header: ({ column }) => <h1 className="">Rows</h1>,
+      enableSorting: false,
+    },
+    {
+      accessorKey: "columns",
+      header: ({ column }) => <h1 className="">Columns</h1>,
+      enableSorting: false,
+    },
+    {
+      id: "actions",
+      header: () => <h1 className="text-center">Actions</h1>,
+      cell: ({ row }) => {
+        const fence = row.original;
+        return (
+          <div className="flex items-center justify-center gap-4">
+            <button
+              type="button"
+              className="text-red-600 hover:text-red-800 cursor-pointer"
+              onClick={() => {
+                setRouteData((prev) =>
+                  prev.filter(
+                    (item) => item?.fence_number !== fence?.fence_number
+                  )
+                );
+              }}
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 100,
+    },
+  ];
+
   useEffect(() => {
     const fetchGeofenceById = async () => {
       try {
@@ -178,7 +246,7 @@ const AddGeofence = () => {
               label="Name"
               placeholder="Enter Geofence name"
             />
-            <InputCommon
+            {/* <InputCommon
               control={form.control}
               name="rows"
               label="Rows"
@@ -189,7 +257,7 @@ const AddGeofence = () => {
               name="columns"
               label="Columns"
               placeholder="Enter Total No. of Panel Columns"
-            />
+            /> */}
 
             <div className="flex flex-col justify-start mb-2">
               <Button
@@ -216,7 +284,7 @@ const AddGeofence = () => {
                   {errors.stationPins.message}
                 </p>
               )}
-              <Button
+              {/* <Button
                 type="button"
                 variant="link"
                 className="flex justify-start items-center gap-2 w-full"
@@ -236,18 +304,54 @@ const AddGeofence = () => {
                     : "Add Geofencing points"}{" "}
                   ({routePins.length} added)
                 </span>
-              </Button>
-              {errors.routePins && (
-                <p className="text-red-500 text-sm pl-5">
-                  {errors.routePins.message}
-                </p>
-              )}
+              </Button> */}
+              <div className="flex items-center justify-center flex-col py-4">
+                <Button
+                  type="button"
+                  variant="hover-blue-fit"
+                  className="flex justify-start items-center gap-2"
+                  onClick={() => setShowRouteModal(true)}
+                >
+                  {/* <span className="relative w-8 h-8">
+                  <Image
+                    src="/Images/Location.png"
+                    fill
+                    alt="Location"
+                    className="w-8 h-8 object-cover"
+                  />
+                </span> */}
+                  <span>
+                    {geofenceId
+                      ? "Update Geofencing points"
+                      : "Add Geofencing points"}{" "}
+                    {/* ({routePins.length} added) */}
+                  </span>
+                </Button>
+                {errors.routePins && (
+                  <p className="text-red-500 text-sm pl-5">
+                    {errors.routePins.message}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="card relative mx-auto h-44 w-80 sm:h-[16rem] sm:w-[35rem] rounded-lg shadow-xl bg-blue-950 overflow-hidden">
+            {/* <div className="card relative mx-auto h-44 w-80 sm:h-[16rem] sm:w-[35rem] rounded-lg shadow-xl bg-blue-950 overflow-hidden">
               <InteractiveMap displayOnly={true} pins={allPins} />
+            </div> */}
+            <div>
+              <DataTableCommon
+                // filters={filters}
+                columns={columns}
+                data={routeData}
+                // isLoading={drones.isLoading}
+                // selectedFilter={selectedFilter}
+                // setSelectedFilter={setSelectedFilter}
+                // totalDataCount={bankAccountsData.count}
+                // onFetchData={(offset, limit) =>
+                //   dispatch(getAllBankAccounts({ offset, limit }))
+                // }
+              />
             </div>
-
             <Button
               type="submit"
               variant="hover-blue-full"
@@ -270,13 +374,13 @@ const AddGeofence = () => {
         />
 
         {/* Route Modal */}
-        <FullScreenMapModal
+        <FullScreenMapRouteModal
           isOpen={showRouteModal}
           onClose={() => setShowRouteModal(false)}
-          onSave={handleRoutePins}
+          onSave={handleRouteData}
           title="Add Geofencing Points"
           mode="route"
-          existingPins={routePins}
+          // existingPins={routePins}
           handleDeletePins={handleDeletePins}
         />
       </div>

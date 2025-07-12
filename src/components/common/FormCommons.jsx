@@ -1207,6 +1207,125 @@ export const ComboboxCommon = ({
   );
 };
 
+export const MultiSelectComboboxCommon = ({
+  control,
+  name,
+  label,
+  items = [],
+  placeholder,
+  isLoading,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => {
+        const selectedValues = field.value || [];
+
+        const handleSelect = (value) => {
+          const alreadySelected = selectedValues.includes(value);
+          const newValues = alreadySelected
+            ? selectedValues.filter((v) => v !== value)
+            : [...selectedValues, value];
+          field.onChange(newValues);
+        };
+
+        // Fixed: Separate handler for removing items
+        const handleRemove = (value, e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSelect(value);
+        };
+
+        return (
+          <FormItem className="space-y-2">
+            {label && <FormLabel>{label}</FormLabel>}
+            <FormControl>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {selectedValues.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {selectedValues.map((val) => {
+                          const item = items.find((i) => String(i.id) === val);
+                          return (
+                            <Badge
+                              key={val}
+                              className="flex items-center gap-1"
+                              variant="secondary"
+                            >
+                              {item?.name || val}
+                              <X
+                                className="w-3 h-3 cursor-pointer hover:text-red-500"
+                                onClick={(e) => handleRemove(val, e)}
+                              />
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {placeholder}
+                      </span>
+                    )}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search..."
+                      onValueChange={setQuery}
+                    />
+                    <CommandList className="max-h-60 overflow-auto">
+                      {isLoading ? (
+                        <SpinnerCommon />
+                      ) : (
+                        <>
+                          <CommandEmpty>No options found.</CommandEmpty>
+                          <CommandGroup>
+                            {items.map((item) => {
+                              const isSelected = selectedValues.includes(
+                                String(item.id)
+                              );
+                              return (
+                                <CommandItem
+                                  key={item.id}
+                                  value={String(item.id)}
+                                  onSelect={() => handleSelect(String(item.id))}
+                                >
+                                  <Check
+                                    className={`mr-2 h-4 w-4 ${
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    }`}
+                                  />
+                                  {item.name}
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+};
+
 export const DatePickerCommon = ({
   control,
   formType = "normal",

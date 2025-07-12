@@ -45,7 +45,7 @@ const ModalCommon = ({
             <DialogDescription>{headerDescription}</DialogDescription>
           </DialogHeader>
         )}
-        <div>{children}</div>
+        <div className="min-h-[50vh] overflow-y-auto">{children}</div>
         {DialogFotterComponent && DialogFotterComponent}
       </DialogContent>
     </Dialog>

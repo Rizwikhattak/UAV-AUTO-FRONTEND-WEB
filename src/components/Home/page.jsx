@@ -2,9 +2,13 @@
 import { AlignJustify, Bell } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ROUTES } from "@/utils/constants";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllMissionPlans } from "@/store/Actions/planMissionActions";
+import { convertToISODateTime } from "@/utils/Helpers";
+import ComenceNowDialogue from "@/components/Home/ComenceNowDialogue";
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -21,6 +25,34 @@ const itemVariants = {
 };
 
 const HomePage = () => {
+  const dispatch = useDispatch();
+  const planMission = useSelector((state) => state.planMission);
+  const [pendingMissions, setPendingMissions] = useState([]);
+  const fetchAllPendingMissions = async () => {
+    try {
+      const resp = await dispatch(getAllMissionPlans()).unwrap();
+      const pendings = [];
+      resp.data.forEach((mission) => {
+        const missionDateTime = new Date(mission?.start_datetime);
+        const now = new Date();
+        if (now >= missionDateTime) {
+          console.log(
+            `Mission date time has passed  ${missionDateTime} now ${now}`
+          );
+          pendings.push(mission);
+        } else {
+          console.log(`Theres still time db: ${missionDateTime} now ${now}`);
+        }
+      });
+      setPendingMissions(pendings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    const timeout = setInterval(() => fetchAllPendingMissions(), 1000 * 5);
+    return () => clearInterval(timeout);
+  }, []);
   return (
     <motion.section
       className="home-section h-screen min-h-screen flex flex-col bg-primary-custom overflow-x-hidden"
@@ -41,6 +73,9 @@ const HomePage = () => {
           {/* <Bell className="w-6 h-6 text-white cursor-pointer" /> */}
         </motion.div>
 
+        {pendingMissions.map((mission, index) => {
+          return <ComenceNowDialogue mission={mission} />;
+        })}
         {/* Drone Image */}
         <motion.div
           className="bg-blue-900 mx-auto relative rounded-lg w-64 h-36 sm:w-80 sm:h-40"
@@ -124,11 +159,11 @@ const items = [
     imageSrc: "/Images/History.png",
     href: ROUTES.VIEW_HISTORY,
   },
-  {
-    label: "Efficiency",
-    imageSrc: "/Images/Efficiency.png",
-    href: ROUTES.EFFICIENCY,
-  },
+  // {
+  //   label: "Efficiency",
+  //   imageSrc: "/Images/Efficiency.png",
+  //   href: ROUTES.EFFICIENCY,
+  // },
 ];
 
 export default HomePage;

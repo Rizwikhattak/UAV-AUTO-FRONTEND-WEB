@@ -4,6 +4,8 @@ import {
   getMissionHistory,
   getMissionHistoryById,
   getMissionPlanById,
+  handleMissionAbort,
+  initializeDrones,
   insertMissionPlan,
   updateMissionPlan,
   uploadMissionVideo,
@@ -66,6 +68,36 @@ const planMissionSlice = createSlice({
         state.error = action.payload;
         state.isPostLoading = false;
         toast.error(TOAST_MESSAGES.PLAN_MISSION.INSERT.ERROR);
+      })
+      .addCase(initializeDrones.pending, (state, action) => {
+        state.isPostLoading = true;
+        state.error = null;
+      })
+      .addCase(initializeDrones.fulfilled, (state, action) => {
+        state.data = action.payload.data;
+        state.isPostLoading = false;
+        state.error = null;
+        state.data = action.payload.data;
+        toast.success(TOAST_MESSAGES.PLAN_MISSION.INITIATE_DRONES.SUCCESS);
+      })
+      .addCase(initializeDrones.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isPostLoading = false;
+        toast.error(TOAST_MESSAGES.PLAN_MISSION.INITIATE_DRONES.ERROR);
+      })
+      .addCase(handleMissionAbort.pending, (state, action) => {
+        state.isPostLoading = true;
+        state.error = null;
+      })
+      .addCase(handleMissionAbort.fulfilled, (state, action) => {
+        state.isPostLoading = false;
+        state.error = null;
+        toast.warning(TOAST_MESSAGES.PLAN_MISSION.ABORT.SUCCESS);
+      })
+      .addCase(handleMissionAbort.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isPostLoading = false;
+        toast.error(TOAST_MESSAGES.PLAN_MISSION.ABORT.ERROR);
       })
       .addCase(updateMissionPlan.pending, (state, action) => {
         state.isPostLoading = true;
